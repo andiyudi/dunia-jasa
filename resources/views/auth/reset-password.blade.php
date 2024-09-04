@@ -1,39 +1,79 @@
-<x-guest-layout>
-    <form method="POST" action="{{ route('password.store') }}">
-        @csrf
+<!DOCTYPE html>
+<html lang="en">
 
-        <!-- Password Reset Token -->
-        <input type="hidden" name="token" value="{{ $request->route('token') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password - {{ config('app.name', 'Laravel') }}</title>
+    <link rel="stylesheet" href="{{ asset ('') }}cms/assets/css/bootstrap.css">
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $request->email)" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+    <link rel="shortcut icon" href="{{ asset ('') }}cms/assets/images/favicon.svg" type="image/x-icon">
+    <link rel="stylesheet" href="{{ asset ('') }}cms/assets/css/app.css">
+</head>
+
+<body>
+    <div id="auth">
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-5 col-sm-12 mx-auto">
+            <div class="card pt-4">
+                <div class="card-body">
+                    <div class="text-center mb-5">
+                        <img src="{{ asset ('') }}cms/assets/images/favicon.svg" height="48" class='mb-4'>
+                        <h3>Reset Password</h3>
+                        <p>Please set your new password for continue to Dunia Jasa.</p>
+                    </div>
+                    <form method="POST" action="{{ route('password.store') }}">
+                        @csrf
+                        <input type="hidden" name="token" value="{{ $request->route('token') }}">
+                        <div class="form-group position-relative has-icon-left">
+                            <label for="email">Email</label>
+                            <div class="position-relative">
+                                <input type="text" class="form-control" id="email" name="email" value={{ $request->email }}>
+                                <div class="form-control-icon">
+                                    <i data-feather="mail"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group position-relative has-icon-left">
+                            <div class="clearfix">
+                                <label for="password">Password</label>
+                            </div>
+                            <div class="position-relative">
+                                <input type="password" class="form-control" id="password" name="password">
+                                <div class="form-control-icon">
+                                    <i data-feather="lock"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group position-relative has-icon-left">
+                            <div class="clearfix">
+                                <label for="password_confirmation">Confirm Password</label>
+                            </div>
+                            <div class="position-relative">
+                                <input type="password" class="form-control" id="password_confirmation" name="password_confirmation">
+                                <div class="form-control-icon">
+                                    <i data-feather="lock"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="clearfix">
+                            <a href="{{ route('home') }}" type="button" class="btn btn-secondary me-md-2">Back</a>
+                            <button type="submit" class="btn btn-primary float-end">Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
+    </div>
+</div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+    </div>
+    <script src="{{ asset ('') }}cms/assets/js/feather-icons/feather.min.js"></script>
+    <script src="{{ asset ('') }}cms/assets/js/app.js"></script>
 
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+    <script src="{{ asset ('') }}cms/assets/js/main.js"></script>
+</body>
 
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                                type="password"
-                                name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Reset Password') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+</html>

@@ -1,25 +1,52 @@
-<x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgot Password - {{ config('app.name', 'Laravel') }}</title>
+    <link rel="stylesheet" href="{{ asset ('') }}cms/assets/css/bootstrap.css">
+
+    <link rel="shortcut icon" href="{{ asset ('') }}cms/assets/images/favicon.svg" type="image/x-icon">
+    <link rel="stylesheet" href="{{ asset ('') }}cms/assets/css/app.css">
+</head>
+
+<body>
+    <div id="auth">
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-5 col-sm-12 mx-auto">
+            <div class="card py-4">
+                <div class="card-body">
+                    <div class="text-center mb-5">
+                        <img src="{{ asset ('') }}cms/assets/images/favicon.svg" height="48" class='mb-4'>
+                        <h3>Forgot Password</h3>
+                        <p>Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.</p>
+                    </div>
+                    <form method="POST" action="{{ route('password.email') }}">
+                        @csrf
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" class="form-control" name="email">
+                        </div>
+
+                        <div class="clearfix">
+                            <a href="{{ route('home') }}" type="button" class="btn btn-secondary me-md-2">Back</a>
+                            <button type="submit" class="btn btn-primary float-end">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    </div>
+    <script src="{{ asset ('') }}cms/assets/js/feather-icons/feather.min.js"></script>
+    <script src="{{ asset ('') }}cms/assets/js/app.js"></script>
 
-    <form method="POST" action="{{ route('password.email') }}">
-        @csrf
+    <script src="{{ asset ('') }}cms/assets/js/main.js"></script>
+</body>
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+</html>
