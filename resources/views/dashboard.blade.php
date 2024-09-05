@@ -166,7 +166,9 @@
             <div class="main-content container-fluid">
                 <div class="page-title">
                     <h3>Dashboard</h3>
-                    <p class="text-subtitle text-muted">A good dashboard to display your statistics</p>
+                    <p class="text-subtitle text-muted">
+                        Dunia Jasa Ads
+                    </p>
                 </div>
                 <section class="section">
                     <div class="row mb-2">
@@ -175,9 +177,9 @@
                                 <div class="card-body p-0">
                                     <div class="d-flex flex-column">
                                         <div class='px-3 py-3 d-flex justify-content-between'>
-                                            <h3 class='card-title'>BALANCE</h3>
+                                            <h3 class='card-title'>Place for Ads</h3>
                                             <div class="card-right d-flex align-items-center">
-                                                <p>$50 </p>
+                                                <p></p>
                                             </div>
                                         </div>
                                         <div class="chart-wrapper">
@@ -192,9 +194,9 @@
                                 <div class="card-body p-0">
                                     <div class="d-flex flex-column">
                                         <div class='px-3 py-3 d-flex justify-content-between'>
-                                            <h3 class='card-title'>Revenue</h3>
+                                            <h3 class='card-title'>Place for Ads</h3>
                                             <div class="card-right d-flex align-items-center">
-                                                <p>$532,2 </p>
+                                                <p></p>
                                             </div>
                                         </div>
                                         <div class="chart-wrapper">
@@ -209,9 +211,9 @@
                                 <div class="card-body p-0">
                                     <div class="d-flex flex-column">
                                         <div class='px-3 py-3 d-flex justify-content-between'>
-                                            <h3 class='card-title'>ORDERS</h3>
+                                            <h3 class='card-title'>Place for Ads</h3>
                                             <div class="card-right d-flex align-items-center">
-                                                <p>1,544 </p>
+                                                <p></p>
                                             </div>
                                         </div>
                                         <div class="chart-wrapper">
@@ -226,9 +228,9 @@
                                 <div class="card-body p-0">
                                     <div class="d-flex flex-column">
                                         <div class='px-3 py-3 d-flex justify-content-between'>
-                                            <h3 class='card-title'>Sales Today</h3>
+                                            <h3 class='card-title'>Place for Ads</h3>
                                             <div class="card-right d-flex align-items-center">
-                                                <p>423 </p>
+                                                <p></p>
                                             </div>
                                         </div>
                                         <div class="chart-wrapper">
