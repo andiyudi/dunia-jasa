@@ -8,6 +8,7 @@
     @include('includes.style')
 </head>
 <body>
+    @routes()
     <div id="app">
         @include('includes.sidebar')
         <div id="main">
@@ -39,5 +40,7 @@
     {{-- <script src="{{ asset('') }}cms/assets/js/pages/dashboard.js"></script> --}}
 
     <script src="{{ asset('') }}cms/assets/js/main.js"></script>
+
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 </body>
 </html>

@@ -14,7 +14,7 @@
                     </li>
                     <li class='sidebar-title'>Category</li>
                     <li class="sidebar-item  ">
-                        <a href="#" class='sidebar-link'>
+                        <a href="{{ route('category.index') }}" class='sidebar-link'>
                             <i data-feather="menu" width="20"></i>
                             <span>Master Category</span>
                         </a>
@@ -32,24 +32,11 @@
                             <span>List Vendor</span>
                         </a>
                         <ul class="submenu ">
-                            <li>
-                                <a href="#">Manufactur</a>
-                            </li>
-                            <li>
-                                <a href="#">General Supplier</a>
-                            </li>
-                            <li>
-                                <a href="#">Specialist Supplier</a>
-                            </li>
-                            <li>
-                                <a href="#">Contractor</a>
-                            </li>
-                            <li>
-                                <a href="#">Consultant</a>
-                            </li>
-                            <li>
-                                <a href="#">Service etc</a>
-                            </li>
+                            @foreach($categories as $category)
+                                <li>
+                                    <a href="#">{{ $category->name }}</a>
+                                </li>
+                            @endforeach
                         </ul>
                     </li>
                     <li class='sidebar-title'>Jobs</li>
