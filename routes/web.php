@@ -20,6 +20,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 // })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function(){
+    Route::get('/categories/refresh', [DashboardController::class, 'refreshCategories'])->name('categories.refresh');
     Route::resource('category', CategoryController::class);
 });
 

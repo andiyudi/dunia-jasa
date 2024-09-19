@@ -19,7 +19,7 @@ class CategorySeeder extends Seeder
             'Specialist Supplier',
             'Contractor',
             'Consultant',
-            'Service etc'
+            'Service'
         ];
 
         foreach ($categories as $category) {

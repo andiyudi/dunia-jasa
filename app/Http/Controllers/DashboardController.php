@@ -12,12 +12,19 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        // Ambil semua kategori dari database
-        $categories = Category::all();
+        // // Ambil semua kategori dari database
+        // $categories = Category::all();
 
         // Kirim data kategori ke view 'dashboard'
-        return view('dashboard', compact('categories'));
+        return view('dashboard');
     }
+
+    public function refreshCategories()
+    {
+        $categories = Category::all();
+        return response()->json($categories);
+    }
+
 
     /**
      * Show the form for creating a new resource.

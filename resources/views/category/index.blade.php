@@ -41,83 +41,115 @@ $pretitle = 'Master';
         </div>
     </div>
 
-<script>
-    $(function() {
-        let table = $('#category-table').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: '{{ route('category.data') }}',
-            columns: [
-                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                { data: 'name', name: 'name' },
-                { data: 'action', name: 'action', orderable: false, searchable: false }
-            ]
-        });
-
-        // Open modal for creating new category
-        $('#create-new-category').click(function() {
-            $('#category-modal').modal('show');
-            $('#categoryModalLabel').text('Create Category');
-            $('#category-form')[0].reset();
-            $('#category_id').val('');
-            $('#save-btn').text('Create');
-        });
-
-        // Save or Update Category
-        $('#category-form').submit(function(e) {
-            e.preventDefault();
-            let formData = $(this).serialize();
-            let category_id = $('#category_id').val();
-            let url = category_id ? "{{ route('category.index') }}" + '/' + category_id : "{{ route('category.store') }}";
-            let method = category_id ? 'PUT' : 'POST';
-
-            $.ajax({
-                url: url,
-                type: method,
-                data: formData,
-                success: function(response) {
-                    $('#category-modal').modal('hide');
-                    table.ajax.reload();
-                    alert(response.success); // Tampilkan pesan sukses
-                },
-                error: function(xhr) {
-                    alert('Error saving category!');
-                }
+    <script>
+        $(function() {
+            let table = $('#category-table').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: '{{ route('category.data') }}',
+                columns: [
+                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                    { data: 'name', name: 'name' },
+                    { data: 'action', name: 'action', orderable: false, searchable: false }
+                ]
             });
-        });
 
-        // Edit Category
-        $('body').on('click', '.edit-category', function() {
-            let category_id = $(this).data('id');
-            $.get("{{ route('category.index') }}" + '/' + category_id + '/edit', function (data) {
-                $('#categoryModalLabel').text('Edit Category');
-                $('#save-btn').text('Update');
+            // Open modal for creating new category
+            $('#create-new-category').click(function() {
                 $('#category-modal').modal('show');
-                $('#category_id').val(data.id);
-                $('#name').val(data.name);
+                $('#categoryModalLabel').text('Create Category');
+                $('#category-form')[0].reset();
+                $('#category_id').val('');
+                $('#save-btn').text('Create');
             });
-        });
 
-        // Delete Category
-        $('body').on('click', '.delete-category', function() {
-            let category_id = $(this).data('id');
-            if (confirm('Are you sure want to delete this category?')) {
+            // Save or Update Category
+            $('#category-form').submit(function(e) {
+                e.preventDefault();
+                let formData = $(this).serialize();
+                let category_id = $('#category_id').val();
+                let url = category_id ? "{{ route('category.index') }}" + '/' + category_id : "{{ route('category.store') }}";
+                let method = category_id ? 'PUT' : 'POST';
+
                 $.ajax({
-                    data: {
-                        "_token": "{{ csrf_token() }}", // Tambahkan token CSRF
-                    },
-                    url: "{{ route('category.index') }}" + '/' + category_id,
-                    type: 'DELETE',
+                    url: url,
+                    type: method,
+                    data: formData,
                     success: function(response) {
+                        $('#category-modal').modal('hide');
                         table.ajax.reload();
-                        alert('Category deleted successfully!');
+
+                        // Success alert using SweetAlert2
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: response.success
+                        });
                     },
                     error: function(xhr) {
-                        alert('Error deleting category!');
+                        // Error alert using SweetAlert2
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error saving category!'
+                        });
                     }
                 });
-            }
+            });
+
+            // Edit Category
+            $('body').on('click', '.edit-category', function() {
+                let category_id = $(this).data('id');
+                $.get("{{ route('category.index') }}" + '/' + category_id + '/edit', function (data) {
+                    $('#categoryModalLabel').text('Edit Category');
+                    $('#save-btn').text('Update');
+                    $('#category-modal').modal('show');
+                    $('#category_id').val(data.id);
+                    $('#name').val(data.name);
+                });
+            });
+
+            // Delete Category
+            $('body').on('click', '.delete-category', function() {
+                let category_id = $(this).data('id');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'No, cancel!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            data: {
+                                "_token": "{{ csrf_token() }}", // Add CSRF token
+                            },
+                            url: "{{ route('category.index') }}" + '/' + category_id,
+                            type: 'DELETE',
+                            success: function(response) {
+                                table.ajax.reload();
+
+                                // Success alert using SweetAlert2
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Deleted!',
+                                    text: 'Category deleted successfully!'
+                                });
+                            },
+                            error: function(xhr) {
+                                // Error alert using SweetAlert2
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Error deleting category!'
+                                });
+                            }
+                        });
+                    }
+                });
+            });
         });
-    });
-</script>
+    </script>
+    
 @endsection

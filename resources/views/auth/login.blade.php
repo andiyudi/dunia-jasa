@@ -24,16 +24,38 @@
                         <h3>Sign In</h3>
                         <p>Please sign in to continue to Dunia Jasa.</p>
                     </div>
+                    <!-- Check for session status (e.g., success message) -->
+                    @if (session('status'))
+                        <div class="alert alert-success">
+                            {{ session('status') }}
+                        </div>
+                    @endif
+
+                    <!-- Display validation error messages -->
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     <form method="POST" action="{{ route('login') }}">
                         @csrf
                         <div class="form-group position-relative has-icon-left">
                             <label for="email">Email</label>
                             <div class="position-relative">
-                                <input type="text" class="form-control" id="email" name="email">
+                                <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required autofocus>
                                 <div class="form-control-icon">
                                     <i data-feather="mail"></i>
                                 </div>
                             </div>
+                            @error('email')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
                         </div>
                         <div class="form-group position-relative has-icon-left">
                             <div class="clearfix">
@@ -43,11 +65,16 @@
                                 </a>
                             </div>
                             <div class="position-relative">
-                                <input type="password" class="form-control" id="password" name="password">
+                                <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required>
                                 <div class="form-control-icon">
                                     <i data-feather="lock"></i>
                                 </div>
                             </div>
+                            @error('password')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
                         </div>
 
                         <div class='form-check clearfix my-4'>
