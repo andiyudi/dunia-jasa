@@ -5,19 +5,20 @@ $title    = 'Category';
 $pretitle = 'Master';
 @endphp
     <h3>List</h3>
-    <div class="mb-3">
-        <button class="btn btn-primary float-end mb-3" id="create-new-category">Create Category</button>
+    <div class="table-responsive">
+        <div class="mb-3">
+            <button class="btn btn-primary float-end mb-3" id="create-new-category">Create Category</button>
+        </div>
+        <table class="table table-responsive table-bordered table-striped table-hover" id="category-table" width="100%">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+        </table>
     </div>
-    <table class="table table-bordered" id="category-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-    </table>
-
     <!-- Modal -->
     <div class="modal fade" id="category-modal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -34,7 +35,9 @@ $pretitle = 'Master';
                             <label for="name" class="form-label">Category Name</label>
                             <input type="text" class="form-control" id="name" name="name" required>
                         </div>
-                        <button type="submit" class="btn btn-primary" id="save-btn">Save</button>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-success" id="save-btn">Save</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -46,6 +49,7 @@ $pretitle = 'Master';
             let table = $('#category-table').DataTable({
                 processing: true,
                 serverSide: true,
+                responsive: true,
                 ajax: '{{ route('category.data') }}',
                 columns: [
                     { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
@@ -60,7 +64,7 @@ $pretitle = 'Master';
                 $('#categoryModalLabel').text('Create Category');
                 $('#category-form')[0].reset();
                 $('#category_id').val('');
-                $('#save-btn').text('Create');
+                $('#save-btn').text('Submit');
             });
 
             // Save or Update Category
@@ -151,5 +155,5 @@ $pretitle = 'Master';
             });
         });
     </script>
-    
+
 @endsection

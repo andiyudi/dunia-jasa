@@ -22,13 +22,19 @@
                         </li>
                     @endif
                     <li class='sidebar-title'>Vendor</li>
-                        <li class="sidebar-item  ">
+                        {{-- <li class="sidebar-item  ">
                             <a href="#" class='sidebar-link'>
                                 <i data-feather="layers" width="20"></i>
                                 <span>Create Vendor</span>
                             </a>
+                        </li> --}}
+                        <li class="sidebar-item  ">
+                            <a href="{{ route('vendor.index') }}" class='sidebar-link'>
+                                <i data-feather="clipboard" width="20"></i>
+                                <span>List Vendor</span>
+                            </a>
                         </li>
-                        <li class="sidebar-item  has-sub ">
+                        {{-- <li class="sidebar-item  has-sub ">
                             <a href="#" class='sidebar-link'>
                                 <i data-feather="clipboard" width="20"></i>
                                 <span>List Vendor</span>
@@ -36,14 +42,14 @@
                             <ul class="submenu" id="category-submenu">
                                 <!-- Categories will be dynamically loaded here -->
                             </ul>
-                        </li>
+                        </li> --}}
                     <li class='sidebar-title'>Jobs</li>
-                    <li class="sidebar-item">
+                    {{-- <li class="sidebar-item">
                         <a href="#" class='sidebar-link'>
                             <i data-feather="link" width="20"></i>
                             <span>Create Procurement</span>
                         </a>
-                    </li>
+                    </li> --}}
                     <li class="sidebar-item">
                         <a href="#" class='sidebar-link'>
                             <i data-feather="list" width="20"></i>
@@ -79,7 +85,7 @@
         <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
     </div>
 </div>
-<script>
+{{-- <script>
     function loadCategories() {
     $.ajax({
         url: "{{ route('categories.refresh') }}",
@@ -106,4 +112,4 @@ $(document).ready(function() {
     setInterval(loadCategories, 3000);
 });
 
-</script>
+</script> --}}
