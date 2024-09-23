@@ -7,7 +7,7 @@ $pretitle = 'Data';
     <h3>List</h3>
     <div class="table-responsive">
         <div class="mb-3">
-            <a href="{{ route('vendor.create') }}" class="btn btn-primary float-end mb-3">Create Vendor</a>
+            <a href="{{ route('partner.create') }}" class="btn btn-primary float-end mb-3">Create Vendor</a>
         </div>
         <table class="table table-responsive table-bordered table-striped table-hover" id="vendor-table" width="100%">
             <thead>
@@ -32,11 +32,11 @@ $pretitle = 'Data';
                 processing: true,
                 serverSide: true,
                 responsive: true,
-                ajax: '{{ route('vendor.index') }}',
+                ajax: '{{ route('partner.index') }}',
                 columns: [
                     { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                     { data: 'name', name: 'name' },
-                    { data: 'name', name: 'category' },
+                    { data: 'categories', name: 'categories' },
                     { data: 'description', name: 'description' },
                     { data: 'brand', name: 'brand' },
                     { data: 'npwp', name: 'npwp' },

@@ -7,7 +7,7 @@ use App\Models\Category;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Vendor extends Model
+class Partner extends Model
 {
     use HasFactory;
 
@@ -18,6 +18,7 @@ class Vendor extends Model
         'npwp',
         'email',
         'contact',
+        'pic',
     ];
 
     public function users()

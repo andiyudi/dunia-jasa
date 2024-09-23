@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\VendorController;
+use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
@@ -23,7 +23,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 Route::middleware(['auth', 'verified'])->group(function(){
     // Route::get('/categories/refresh', [DashboardController::class, 'refreshCategories'])->name('categories.refresh');
     Route::resource('category', CategoryController::class);
-    Route::resource('vendor', VendorController::class);
+    Route::resource('partner', PartnerController::class);
 });
 
 Route::middleware('auth')->group(function () {

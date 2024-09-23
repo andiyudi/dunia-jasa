@@ -6,7 +6,7 @@ $pretitle = 'Data';
 @endphp
     <h3>Create</h3>
     <div>
-        <form action="{{ route('vendor.store') }}" method="POST">
+        <form action="{{ route('partner.store') }}" method="POST">
         @csrf
         <div class="row">
             <!-- Left side: Name and NPWP -->
@@ -35,7 +35,7 @@ $pretitle = 'Data';
                         @foreach ($categories as $category)
                         <div class="col-md-6 mb-2">
                             <div class="form-check">
-                                <input type="checkbox" name="category[]" id="check-{{ $category->id }}" value="{{ $category->name }}" class="form-check-input">
+                                <input type="checkbox" name="category[]" id="check-{{ $category->id }}" value="{{ $category->id }}" class="form-check-input">
                                 <label for="check-{{ $category->id }}" class="form-check-label">{{ $category->name }}</label>
                             </div>
                         </div>
@@ -99,7 +99,7 @@ $pretitle = 'Data';
         </div>
 
         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <a href="{{ route('vendor.index') }}" type="button" class="btn btn-secondary">Back</a>
+            <a href="{{ route('partner.index') }}" type="button" class="btn btn-secondary">Back</a>
             <button type="submit" class="btn btn-success">Save</button>
         </div>
         </form>

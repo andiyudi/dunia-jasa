@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Vendor;
+use App\Models\Partner;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -49,8 +49,8 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    public function vendors()
+    public function partners()
     {
-        return $this->belongsToMany(Vendor::class);
+        return $this->belongsToMany(Partner::class);
     }
 }

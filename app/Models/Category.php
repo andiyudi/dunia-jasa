@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Vendor;
+use App\Models\Partner;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -14,8 +14,8 @@ class Category extends Model
         'name',
     ];
 
-    public function vendors()
+    public function partners()
     {
-        return $this->belongsToMany(Vendor::class);
+        return $this->belongsToMany(Partner::class);
     }
 }
