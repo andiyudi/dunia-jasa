@@ -16,11 +16,8 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->string('npwp')->nullable();
             $table->text('description');
-            $table->json('brand')->nullable();
-            $table->json('pic')->nullable();
-            $table->json('email')->nullable();
-            $table->json('contact')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('vendors');
+        Schema::dropIfExists('partners');
     }
 };

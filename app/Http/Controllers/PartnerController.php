@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Partner;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use RealRashid\SweetAlert\Facades\Alert;
 use Yajra\DataTables\Facades\DataTables;
@@ -17,57 +16,64 @@ class PartnerController extends Controller
      */
     public function index(Request $request)
     {
-        // Cek apakah ini adalah request AJAX untuk DataTables
+        // Check if this is an AJAX request for DataTables
         if ($request->ajax()) {
-            $partners = Partner::query();
+            $partners = Partner::query()
+            ->with('categories', 'brands', 'users') // Eager load relationships
+            ->whereHas('users', function($query) {
+                // Filter partners by the authenticated user
+                $query->where('user_id', auth()->id());
+            });
 
-            // Filter berdasarkan kategori jika ada
+            // Filter by category if provided
             if ($request->has('category') && $request->category != '') {
                 $partners->whereHas('categories', function($query) use ($request) {
                     $query->where('category_id', $request->category);
                 });
             }
 
-            // Filter berdasarkan brand jika ada
+            // Filter by brand if provided
             if ($request->has('brand') && $request->brand != '') {
-                $partners->whereRaw('LOWER(brand) LIKE ?', ['%' . strtolower($request->brand) . '%']);
+                $partners->whereHas('brands', function($query) use ($request) {
+                    $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($request->brand) . '%']);
+                });
             }
 
-            // Mengembalikan data untuk DataTables
+            // Return data for DataTables
             return DataTables::of($partners)
                 ->addColumn('categories', function($data) {
                     $categories = $data->categories->pluck('name');
                     return $categories->map(function($category, $index) {
                         return ($index + 1) . '.' . $category;
-                    })->implode('<br>'); // Menambahkan nomor dengan line break
+                    })->implode('<br>'); // Numbered list with line breaks
                 })
                 ->addColumn('brand', function($data) {
-                    // Jika 'brand' adalah JSON, gunakan json_decode
-                    $brands = is_string($data->brand) ? json_decode($data->brand) : [$data->brand];
-                    return collect($brands)->map(function($brand, $index) {
+                    // Fetch brands from the brands table (one-to-many relationship)
+                    $brands = $data->brands->pluck('name');
+                    return $brands->map(function($brand, $index) {
                         return ($index + 1) . '.' . $brand;
-                    })->implode('<br>'); // Menambahkan nomor dengan line break
+                    })->implode('<br>'); // Numbered list with line breaks
                 })
                 ->addColumn('email', function($data) {
-                    // Jika 'email' adalah JSON, gunakan json_decode
-                    $emails = is_string($data->email) ? json_decode($data->email) : [$data->email];
-                    return collect($emails)->map(function($email, $index) {
+                    // Fetch emails from the related users table (many-to-many relationship)
+                    $emails = $data->users->pluck('email');
+                    return $emails->map(function($email, $index) {
                         return ($index + 1) . '.' . $email;
-                    })->implode('<br>'); // Menambahkan nomor dengan line break
+                    })->implode('<br>'); // Numbered list with line breaks
                 })
                 ->addColumn('contact', function($data) {
-                    // Jika 'contact' adalah JSON, gunakan json_decode
-                    $contacts = is_string($data->contact) ? json_decode($data->contact) : [$data->contact];
-                    return collect($contacts)->map(function($contact, $index) {
+                    // Assuming 'contact' is a field in the users table, you can retrieve it from there
+                    $contacts = $data->users->pluck('phone');
+                    return $contacts->map(function($contact, $index) {
                         return ($index + 1) . '.' . $contact;
-                    })->implode('<br>'); // Menambahkan nomor dengan line break
+                    })->implode('<br>'); // Numbered list with line breaks
                 })
                 ->addColumn('pic', function($data) {
-                    // Jika 'pic' adalah JSON, gunakan json_decode
-                    $pics = is_string($data->pic) ? json_decode($data->pic) : [$data->pic];
-                    return collect($pics)->map(function($pic, $index) {
+                    // Fetch PICs from the related users table (many-to-many relationship)
+                    $pics = $data->users->pluck('name'); // Assuming 'name' is the PIC
+                    return $pics->map(function($pic, $index) {
                         return ($index + 1) . '.' . $pic;
-                    })->implode('<br>'); // Menambahkan nomor dengan line break
+                    })->implode('<br>'); // Numbered list with line breaks
                 })
                 ->addColumn('action', function($data){
                     $route = 'partner';
@@ -78,10 +84,11 @@ class PartnerController extends Controller
                 ->make(true);
         }
 
-        // Jika bukan AJAX request, kembalikan view
-        $categories = Category::all(); // Pastikan Anda mengambil data kategori
+        // If not an AJAX request, return the view
+        $categories = Category::all(); // Fetch all categories for filtering
         return view('partner.index', compact('categories'));
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -92,78 +99,103 @@ class PartnerController extends Controller
         return view('partner.create', compact('categories'));
     }
 
+    public function checkName(Request $request)
+    {
+        // Validate that 'name' is present in the request
+        $request->validate(['name' => 'required|string']);
+
+        // Search for vendor by name and include brands and categories
+        $vendor = Partner::where('name', $request->name)
+            ->with(['brands', 'categories']) // Include brands and categories relationships
+            ->first();
+
+        // If vendor is found
+        if ($vendor) {
+            return response()->json([
+                'exists' => true,
+                'npwp' => $vendor->npwp,
+                'description' => $vendor->description,
+                'categories' => $vendor->categories->pluck('id'), // Get related category IDs
+                'brands' => $vendor->brands->pluck('name'), // Get related brand names
+            ]);
+        }
+
+        // If vendor is not found
+        return response()->json(['exists' => false]);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        // Cek apakah partner dengan nama tersebut sudah ada
-        $partner = Partner::where('name', $request->input('name'))->first();
-
-        // Jika partner sudah ada, kita akan mengecualikan validasi unique berdasarkan id
+        // Validate the request input
         $validatedData = $request->validate([
             'name' => [
                 'required',
                 'string',
                 'max:255',
-                $partner ? Rule::unique('partners', 'name')->ignore($partner->id) : 'unique:partners,name',
-            ],  // Nama wajib diisi dan unik kecuali untuk data yang sedang di-update
-            'npwp' => 'required|string|max:15', // NPWP wajib dan maksimal 15 karakter
-            'description' => 'required|string', // Deskripsi bisa kosong
-            'brand' => 'required|array', // Brand harus berupa array (karena JSON array)
-            'brand.*' => 'required|string|max:255', // Setiap item dalam array brand wajib diisi
-            'email' => 'required|array', // Email harus berupa array
-            'email.*' => 'required|email|max:255', // Setiap item dalam array email harus format email yang valid
-            'contact' => 'required|array', // Kontak harus berupa array
-            'contact.*' => 'required|string|max:15', // Setiap item dalam array kontak maksimal 15 karakter
-            'pic' => 'required|array', // PIC harus berupa array
-            'pic.*' => 'required|string|max:255', // Setiap item dalam array PIC wajib diisi
-            'category' => 'required|array', // Kategori bisa kosong tapi jika ada harus array
-            'category.*' => 'exists:categories,id' // Setiap kategori harus ada dalam tabel kategori
+            ],
+            'npwp' => 'required|string|max:15',
+            'description' => 'required|string', // Allow null for description
+            'brand' => 'required|array', // Brands must be an array
+            'brand.*' => 'required|string|max:255', // Each brand must be a string
+            'category' => 'required|array', // Categories must be an array
+            'category.*' => 'exists:categories,id', // Categories must exist in the database
         ]);
-        DB::beginTransaction();
-        try {
-            // Upsert partner data based on 'name' uniqueness
-            $partner = Partner::updateOrCreate(
-                ['name' => $validatedData['name']], // Search criteria
-                [
-                    'npwp' => $validatedData['npwp'],
-                    'description' => $request->input('description'), // Bisa null
-                    'brand' => json_encode($validatedData['brand']), // Simpan brand sebagai JSON array
-                    'email' => json_encode($validatedData['email']), // Simpan email sebagai JSON array
-                    'contact' => json_encode($validatedData['contact']), // Simpan kontak sebagai JSON array
-                    'pic' => json_encode($validatedData['pic']), // Simpan PIC sebagai JSON array
-                ]
-            );
 
-            // Upsert into user_partner pivot table
+        DB::beginTransaction();
+
+        try {
+            // Check if the partner exists by name
+            $partner = Partner::where('name', $validatedData['name'])->first();
+
+            if ($partner) {
+                // Update existing partner
+                $partner->update([
+                    'npwp' => $validatedData['npwp'],
+                    'description' => $validatedData['description'],
+                ]);
+            } else {
+                // Create a new partner
+                $partner = Partner::create([
+                    'name' => $validatedData['name'],
+                    'npwp' => $validatedData['npwp'],
+                    'description' => $validatedData['description'],
+                ]);
+            }
+
+            // Sync partner with user (many-to-many)
             $partner->users()->syncWithoutDetaching(auth()->id());
 
-            // Insert into category_partner pivot table if categories are provided
+            // Sync partner with categories (many-to-many)
             if ($request->has('category')) {
                 $partner->categories()->sync($validatedData['category']);
             }
 
-            // Commit the transaction if everything is successful
+            // Insert or update the brands (one-to-many)
+            if ($request->has('brand')) {
+                $partner->brands()->delete(); // Clear existing brands if any
+                foreach ($validatedData['brand'] as $brandName) {
+                    $partner->brands()->create(['name' => $brandName]);
+                }
+            }
+
             DB::commit();
 
-            // Redirect to vendor index with success message
+            // Return success message and redirect
             Alert::success('Success', 'Vendor data successfully stored');
             return redirect()->route('partner.index');
-            // ->with('success', 'Vendor upserted successfully.');
 
         } catch (\Exception $e) {
-            // Rollback the transaction in case of any error
-        DB::rollBack();
+            DB::rollBack();
 
-        // Log the error (optional)
-        \Log::error('Error upserting vendor: ' . $e->getMessage());
+            // Log the error
+            \Log::error('Error upserting vendor: ' . $e->getMessage());
 
-        // Display error alert
-        Alert::error('Error', 'Failed to upsert vendor. Please try again.');
-
-        // Redirect back with error message
-        return redirect()->back()->withInput(); // Use withInput() to preserve form data
+            // Display error alert and redirect back
+            Alert::error('Error', 'Failed to upsert vendor. Please try again.');
+            return redirect()->back()->withInput();
         }
     }
 

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Category extends Model
+class Brand extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -15,8 +15,8 @@ class Category extends Model
         'name',
     ];
 
-    public function partners()
+    public function partner()
     {
-        return $this->belongsToMany(Partner::class)->withTimestamps();
+        return $this->belongsTo(Partner::class);
     }
 }

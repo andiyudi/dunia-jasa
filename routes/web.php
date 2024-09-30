@@ -8,6 +8,8 @@ use App\Http\Controllers\DashboardController;
 
 
 Route::get('category/data', [CategoryController::class, 'getData'])->name('category.data');
+Route::post('partner/check', [PartnerController::class, 'checkName'])->name('partner.check');
+
 
 Route::get('/', function () {
     return view('home');
@@ -16,12 +18,8 @@ Route::get('/', function () {
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
-// Route::get('/dashboard', function () {
-//     return view('dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function(){
-    // Route::get('/categories/refresh', [DashboardController::class, 'refreshCategories'])->name('categories.refresh');
     Route::resource('category', CategoryController::class);
     Route::resource('partner', PartnerController::class);
 });

@@ -64,31 +64,3 @@
         <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
     </div>
 </div>
-{{-- <script>
-    function loadCategories() {
-    $.ajax({
-        url: "{{ route('categories.refresh') }}",
-        type: 'GET',
-        success: function(response) {
-            let categorySubmenu = $('#category-submenu');
-            categorySubmenu.empty(); // Clear existing categories
-
-            $.each(response, function(index, category) {
-                categorySubmenu.append(`<li><a href="#">${category.name}</a></li>`);
-            });
-        },
-        error: function() {
-            console.error('Failed to load categories.');
-        }
-    });
-}
-
-// Initial load when the page is ready
-$(document).ready(function() {
-    loadCategories();
-
-    // Set interval for polling (e.g., every 3 seconds)
-    setInterval(loadCategories, 3000);
-});
-
-</script> --}}
