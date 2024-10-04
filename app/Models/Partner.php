@@ -33,4 +33,9 @@ class Partner extends Model
     {
         return $this->hasMany(Brand::class);
     }
+
+    public function files()
+    {
+        return $this->hasMany(File::class, 'partner_id');
+    }
 }

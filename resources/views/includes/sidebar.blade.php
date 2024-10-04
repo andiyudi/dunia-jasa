@@ -13,11 +13,17 @@
                         </a>
                     </li>
                     @if(auth()->user()->is_admin)
-                        <li class='sidebar-title'>Category</li>
+                        <li class='sidebar-title'>Master Data</li>
                         <li class="sidebar-item">
                             <a href="{{ route('category.index') }}" class='sidebar-link'>
                                 <i data-feather="menu" width="20"></i>
                                 <span>Master Category</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="{{ route('type.index') }}" class='sidebar-link'>
+                                <i data-feather="list" width="20"></i>
+                                <span>Master Type</span>
                             </a>
                         </li>
                     @endif

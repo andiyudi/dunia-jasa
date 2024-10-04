@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\File;
+use App\Models\Type;
 use App\Models\Partner;
 use App\Models\Category;
 use Illuminate\Http\Request;
+// use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -202,17 +206,19 @@ class PartnerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Partner $partner)
+    public function show($encryptPartnerId)
     {
-        //
+        $id = decrypt($encryptPartnerId);
+        dd($id);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Partner $partner)
+    public function edit($encryptPartnerId)
     {
-        //
+        $id = decrypt($encryptPartnerId);
+        dd($id);
     }
 
     /**
@@ -230,4 +236,114 @@ class PartnerController extends Controller
     {
         //
     }
+
+    public function upload($encryptPartnerId)
+    {
+        $id = decrypt($encryptPartnerId);
+        $partner = Partner::find($id);
+
+        $types = Type::all();
+
+        return view('partner.upload', compact('partner', 'types'));
+    }
+
+    public function save(Request $request, $id)
+{
+    // Dekripsi partner_id dari route
+    $partnerId = $id;
+
+    // Validate the incoming request
+    $request->validate([
+        'company_profile' => 'required|file|mimes:pdf|max:2048', // PDF file with a max size of 2MB
+        'type_id' => 'required|exists:types,id', // Validates that the selected type exists in the types table
+        'notes' => 'nullable|string|max:255', // Optional notes with a max length of 255 characters
+    ]);
+
+    try {
+        // Begin DB transaction
+        DB::transaction(function () use ($request, $partnerId) {
+            // Check if a file is uploaded
+            if ($request->hasFile('company_profile')) {
+                // Get the uploaded file
+                $file = $request->file('company_profile');
+
+                // Define the file name (use time to ensure unique file names)
+                $fileName = time() . '_' . $file->getClientOriginalName();
+
+                // Get the partner details
+                $partner = Partner::findOrFail($partnerId);
+                $folderName = $partner->name . '-' . $partnerId; // folder name format: partner-name-id
+
+                // Create folder if it doesn't exist
+                $folderId = $this->createOrFindGoogleDriveFolder($folderName);
+
+                // Store the file in Google Drive inside the partner folder
+                Storage::disk('google')->putFileAs($folderId, $file, $fileName); // Upload to the partner's folder
+
+                // Generate the public URL for the uploaded file
+                $filePath = Storage::disk('google')->url($folderId . '/' . $fileName); // Construct the URL
+
+                // Save the file information to the database
+                $fileData = [
+                    'partner_id' => $partnerId, // Ambil partner_id dari route
+                    'type_id' => $request->input('type_id'),
+                    'name' => $fileName,
+                    'path' => $filePath, // Path on Google Drive for download
+                    'note' => $request->input('notes'), // Optional notes
+                ];
+
+                File::create($fileData); // Create a new entry in the files table
+            }
+        });
+
+        // Commit the transaction and redirect back with a success message
+        Alert::success('Success', 'File uploaded successfully');
+        return redirect()->route('partner.index');
+
+    } catch (\Exception $e) {
+        // Rollback transaction and handle any errors during the upload process
+        Alert::error('Error', 'Failed to upload file: ' . $e->getMessage());
+        return redirect()->back();
+    }
+}
+
+/**
+ * Creates or finds a folder on Google Drive by folder name
+ *
+ * @param string $folderName
+ * @return string Folder ID
+ */
+private function createOrFindGoogleDriveFolder($folderName)
+{
+    // Check if the folder exists in Google Drive
+    $folders = Storage::disk('google')->listContents('/', false);
+
+    // Manually search for a folder with the specific folder name
+    $folderId = null;
+    foreach ($folders as $folder) {
+        if ($folder->type() === 'dir' && basename($folder->path()) === $folderName) {
+            $folderId = $folder->path();
+            break;
+        }
+    }
+
+    // If the folder is found, return the folder ID
+    if ($folderId) {
+        return $folderId;
+    } else {
+        // If the folder does not exist, create it
+        Storage::disk('google')->makeDirectory($folderName);
+
+        // List contents again to get the newly created folder ID
+        $folders = Storage::disk('google')->listContents('/', false);
+        foreach ($folders as $folder) {
+            if ($folder->type() === 'dir' && basename($folder->path()) === $folderName) {
+                return $folder->path();
+            }
+        }
+    }
+
+    throw new \Exception('Failed to create or find Google Drive folder.');
+}
+
 }

@@ -28,19 +28,19 @@ $pretitle = 'Data';
         </div>
     </div>
     <div class="table-responsive">
-        <table class="table table-bordered table-striped table-hover display responsive no wrap " id="vendor-table" width="100%">
+        <table class="table table-bordered table-striped table-hover display responsive no wrap" id="vendor-table" width="100%">
             <thead>
                 <tr>
-                    <th>No</th>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th>Brand</th>
-                    <th>NPWP</th>
-                    <th>PIC</th>
-                    <th>Email</th>
-                    <th>Contact</th>
-                    <th>Action</th>
+                    <th style="text-align:center">No</th>
+                    <th style="text-align:center">Name</th>
+                    <th style="text-align:center">Category</th>
+                    <th style="text-align:center">Description</th>
+                    <th style="text-align:center">Brand</th>
+                    <th style="text-align:center">NPWP</th>
+                    <th style="text-align:center">PIC</th>
+                    <th style="text-align:center">Email</th>
+                    <th style="text-align:center">Contact</th>
+                    <th style="text-align:center">Action</th>
                 </tr>
             </thead>
         </table>
