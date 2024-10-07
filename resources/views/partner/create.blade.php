@@ -99,12 +99,11 @@ $pretitle = 'Data';
             <label for="contact" class="form-label">Contact</label>
             <input type="text" class="form-control" name="contact" value="{{ auth()->user()->phone }}" readonly>
         </div>
-    </div>
-
-    <!-- Submit button -->
-    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-        <a href="{{ route('partner.index') }}" type="button" class="btn btn-secondary">Back</a>
-        <button type="submit" class="btn btn-success">Save</button>
+        <!-- Submit button -->
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a href="{{ route('partner.index') }}" type="button" class="btn btn-secondary">Back</a>
+            <button type="submit" class="btn btn-success">Save</button>
+        </div>
     </div>
     </form>
 </div>
