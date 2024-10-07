@@ -40,12 +40,8 @@
 
     <script src="{{ asset('') }}cms/assets/js/main.js"></script>
 
-    <script src="https://cdn.datatables.net/2.1.7/js/dataTables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.datatables.net/rowreorder/1.5.0/js/dataTables.rowReorder.js"></script>
-    <script src="https://cdn.datatables.net/rowreorder/1.5.0/js/rowReorder.dataTables.js"></script>
-    <script src="https://cdn.datatables.net/responsive/3.0.3/js/dataTables.responsive.js"></script>
-    <script src="https://cdn.datatables.net/responsive/3.0.3/js/responsive.dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.1.7/js/dataTables.js"></script>
     @include('sweetalert::alert')
 </body>
 </html>

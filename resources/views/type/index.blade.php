@@ -24,7 +24,7 @@ $pretitle = 'Master';
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="typeModalLabel">Create type</h5>
+                    <h5 class="modal-title" id="typeModalLabel">Create Type</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -32,7 +32,7 @@ $pretitle = 'Master';
                         @csrf
                         <input type="hidden" id="type_id" name="type_id">
                         <div class="mb-3">
-                            <label for="name" class="form-label">type Name</label>
+                            <label for="name" class="form-label">Type Name</label>
                             <input type="text" class="form-control" id="name" name="name" required>
                         </div>
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -61,7 +61,7 @@ $pretitle = 'Master';
             // Open modal for creating new type
             $('#create-new-type').click(function() {
                 $('#type-modal').modal('show');
-                $('#typeModalLabel').text('Create type');
+                $('#typeModalLabel').text('Create Type');
                 $('#type-form')[0].reset();
                 $('#type_id').val('');
                 $('#save-btn').text('Submit');
@@ -105,7 +105,7 @@ $pretitle = 'Master';
             $('body').on('click', '.edit-type', function() {
                 let type_id = $(this).data('id');
                 $.get("{{ route('type.index') }}" + '/' + type_id + '/edit', function (data) {
-                    $('#typeModalLabel').text('Edit type');
+                    $('#typeModalLabel').text('Edit Type');
                     $('#save-btn').text('Update');
                     $('#type-modal').modal('show');
                     $('#type_id').val(data.id);
@@ -138,7 +138,7 @@ $pretitle = 'Master';
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Deleted!',
-                                    text: 'type deleted successfully!'
+                                    text: 'Type deleted successfully!'
                                 });
                             },
                             error: function(xhr) {

@@ -7,8 +7,8 @@ use App\Models\Type;
 use App\Models\Partner;
 use App\Models\Category;
 use Illuminate\Http\Request;
-// use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert;
 use Yajra\DataTables\Facades\DataTables;
@@ -29,7 +29,9 @@ class PartnerController extends Controller
                 $query->where('user_id', auth()->id());
             })
             ->orderBy('created_at', 'desc'); // Order by created_at descending to get the most recent first
-
+            $title = 'Delete Data!';
+            $text = "Are you sure you want to delete this partner from your account?";
+            confirmDelete($title, $text);
             // Filter by category if provided
             if ($request->has('category') && $request->category != '') {
                 $partners->whereHas('categories', function($query) use ($request) {
@@ -236,10 +238,22 @@ class PartnerController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Partner $partner)
+    public function destroy($encryptPartnerId)
     {
-        //
+        $id = decrypt($encryptPartnerId);
+        // Misalnya, Anda mendapatkan user yang ingin dihapus dari partner
+        $userId = Auth::id();
+
+        // Temukan partner berdasarkan ID dan hapus relasi dengan user
+        $partner = Partner::findOrFail($id);
+
+        // Hapus user dari relasi partner
+        $partner->users()->detach($userId);
+
+        Alert::success('Success', 'User has been removed from the partner.');
+        return redirect()->route('partner.index');
     }
+
 
     public function upload($encryptPartnerId)
     {
