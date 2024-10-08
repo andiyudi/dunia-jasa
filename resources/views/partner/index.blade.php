@@ -4,8 +4,7 @@
 $title    = 'Vendor';
 $pretitle = 'Data';
 @endphp
-    <h3>List</h3>
-        <!-- Filter Form -->
+    <!-- Filter Form -->
     <div class="row mb-3">
         <div class="col-md-4 mb-3">
             <select id="category-filter" class="form-select">
@@ -20,7 +19,7 @@ $pretitle = 'Data';
             <input type="text" id="brand-filter" class="form-control" placeholder="Search by Brand">
         </div>
         <div class="col-md-4 mb-3">
-            <div class="btn-group mb-3" role="group" aria-label="Basic example">
+            <div class="btn-group mb-3 float-end" role="group" aria-label="Basic example">
                 <button class="btn btn-light" id="filter-btn">Search</button>
                 <button class="btn btn-dark" id="reset-btn">Reset</button>
                 <a href="{{ route('partner.create') }}" class="btn btn-primary">Create Vendor</a>
@@ -28,22 +27,24 @@ $pretitle = 'Data';
         </div>
     </div>
     <div class="table-responsive">
-        <table class="table table-bordered table-striped table-hover display responsive no wrap" id="vendor-table" width="100%">
-            <thead>
-                <tr>
-                    <th style="text-align:center">No</th>
-                    <th style="text-align:center">Name</th>
-                    <th style="text-align:center">Category</th>
-                    <th style="text-align:center">Description</th>
-                    <th style="text-align:center">Brand</th>
-                    <th style="text-align:center">NPWP</th>
-                    <th style="text-align:center">PIC</th>
-                    <th style="text-align:center">Email</th>
-                    <th style="text-align:center">Contact</th>
-                    <th style="text-align:center">Action</th>
-                </tr>
-            </thead>
-        </table>
+        <div class="col-md-12 mb-3">
+            <table class="table table-bordered table-striped table-hover display responsive no wrap" id="vendor-table" width="100%">
+                <thead>
+                    <tr>
+                        <th style="text-align:center">No</th>
+                        <th style="text-align:center">Name</th>
+                        <th style="text-align:center">Category</th>
+                        <th style="text-align:center">Description</th>
+                        <th style="text-align:center">Brand</th>
+                        <th style="text-align:center">NPWP</th>
+                        <th style="text-align:center">PIC</th>
+                        <th style="text-align:center">Email</th>
+                        <th style="text-align:center">Contact</th>
+                        <th style="text-align:center">Action</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
     </div>
     <script>
         $(function() {

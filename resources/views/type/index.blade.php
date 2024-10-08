@@ -4,7 +4,6 @@
 $title    = 'Type';
 $pretitle = 'Master';
 @endphp
-    <h3>List</h3>
     <div class="row mb-3">
         <div class="table-responsive">
             <div class="col-md-12 mb-3">
