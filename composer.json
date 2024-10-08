@@ -9,7 +9,6 @@
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
         "opcodesio/log-viewer": "^3.11",
-        "realrashid/sweet-alert": "^7.2",
         "tightenco/ziggy": "^2.3",
         "yajra/laravel-datatables": "11.0",
         "yaza/laravel-google-drive-storage": "^3.0"

@@ -35,13 +35,32 @@
     <script src="{{ asset('') }}cms/assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
     <script src="{{ asset('') }}cms/assets/js/app.js"></script>
 
-    <script src="{{ asset('') }}cms/assets/vendors/chartjs/Chart.min.js"></script>
-    <script src="{{ asset('') }}cms/assets/vendors/apexcharts/apexcharts.min.js"></script>
-
     <script src="{{ asset('') }}cms/assets/js/main.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.datatables.net/2.1.7/js/dataTables.js"></script>
-    @include('sweetalert::alert')
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        // Check for session flash data
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '{{ session('success') }}',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'OK'
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: '{{ session('error') }}',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'OK'
+            });
+        @endif
+    </script>
 </body>
 </html>

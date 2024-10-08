@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use RealRashid\SweetAlert\Facades\Alert;
 use Yajra\DataTables\Facades\DataTables;
 
 class PartnerController extends Controller
@@ -29,9 +28,6 @@ class PartnerController extends Controller
                 $query->where('user_id', auth()->id());
             })
             ->orderBy('created_at', 'desc'); // Order by created_at descending to get the most recent first
-            $title = 'Delete Data!';
-            $text = "Are you sure you want to delete this partner from your account?";
-            confirmDelete($title, $text);
             // Filter by category if provided
             if ($request->has('category') && $request->category != '') {
                 $partners->whereHas('categories', function($query) use ($request) {
@@ -182,17 +178,28 @@ class PartnerController extends Controller
 
             // Insert or update the brands (one-to-many)
             if ($request->has('brand')) {
-                $partner->brands()->delete(); // Clear existing brands if any
-                foreach ($validatedData['brand'] as $brandName) {
-                    $partner->brands()->create(['name' => $brandName]);
+                // Ambil semua nama brand yang diinputkan
+                $inputBrands = $validatedData['brand'];
+
+                // Hapus brand yang tidak ada dalam input terbaru
+                $partner->brands()->whereNotIn('name', $inputBrands)->delete();
+
+                // Loop untuk menambahkan atau mempertahankan brand yang ada
+                foreach ($inputBrands as $brandName) {
+                    // Cek apakah brand sudah ada
+                    $existingBrand = $partner->brands()->where('name', $brandName)->first();
+
+                    // Jika brand belum ada, buat yang baru
+                    if (!$existingBrand) {
+                        $partner->brands()->create(['name' => $brandName]);
+                    }
                 }
             }
 
             DB::commit();
 
             // Return success message and redirect
-            Alert::success('Success', 'Vendor data successfully stored');
-            return redirect()->route('partner.index');
+            return redirect()->route('partner.index')->with('success', 'Vendor data successfully stored');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -201,8 +208,7 @@ class PartnerController extends Controller
             \Log::error('Error upserting vendor: ' . $e->getMessage());
 
             // Display error alert and redirect back
-            Alert::error('Error', 'Failed to upsert vendor. Please try again.');
-            return redirect()->back()->withInput();
+            return redirect()->back()->withInput()->with('error', 'Failed to upsert vendor. Please try again.');
         }
     }
 
@@ -238,22 +244,30 @@ class PartnerController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($encryptPartnerId)
+    public function destroy($id)
     {
-        $id = decrypt($encryptPartnerId);
-        // Misalnya, Anda mendapatkan user yang ingin dihapus dari partner
         $userId = Auth::id();
 
-        // Temukan partner berdasarkan ID dan hapus relasi dengan user
-        $partner = Partner::findOrFail($id);
+        try {
+            $partner = Partner::findOrFail($id);
 
-        // Hapus user dari relasi partner
-        $partner->users()->detach($userId);
+            // Detach the user from the partner
+            $partner->users()->detach($userId);
 
-        Alert::success('Success', 'User has been removed from the partner.');
-        return redirect()->route('partner.index');
+            // Check if there are no more users attached to the partner
+            if ($partner->users()->count() == 0) {
+                $partner->brands()->delete();  // Assuming 'brands' is the relationship method in Partner
+                $partner->categories()->detach(); // Remove all relationships with categories
+                $partner->delete(); // Delete the partner if no users are left
+                return redirect()->route('partner.index')->with('success', 'User has been removed and the partner has been deleted.');
+            }
+
+            return redirect()->route('partner.index')->with('success', 'User has been removed from the partner.');
+        } catch (\Exception $e) {
+            \Log::error('Error removing user from partner: ' . $e->getMessage());
+            return redirect()->route('partner.index')->with('error', 'Failed to remove user from partner. Please try again.');
+        }
     }
-
 
     public function upload($encryptPartnerId)
     {
@@ -315,13 +329,11 @@ class PartnerController extends Controller
             });
 
             // Commit the transaction and redirect back with a success message
-            Alert::success('Success', 'File uploaded successfully');
-            return redirect()->route('partner.index');
+            return redirect()->route('partner.index')->with('success', 'File uploaded successfully');
 
         } catch (\Exception $e) {
             // Rollback transaction and handle any errors during the upload process
-            Alert::error('Error', 'Failed to upload file: ' . $e->getMessage());
-            return redirect()->back();
+            return redirect()->back()->with('error', 'Failed to upload file: ' . $e->getMessage());
         }
     }
 

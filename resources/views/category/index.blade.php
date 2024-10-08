@@ -5,9 +5,11 @@ $title    = 'Category';
 $pretitle = 'Master';
 @endphp
     <h3>List</h3>
-    <div class="table-responsive">
-        <div class="mb-3">
-            <button class="btn btn-primary float-end mb-3" id="create-new-category">Create Category</button>
+    <div class="row mb-3">
+        <div class="table-responsive">
+            <div class="col-md-12 mb-3">
+                <button class="btn btn-primary float-end mb-3" id="create-new-category">Create Category</button>
+            </div>
         </div>
         <table class="table table-responsive table-bordered table-striped table-hover" id="category-table" width="100%">
             <thead>

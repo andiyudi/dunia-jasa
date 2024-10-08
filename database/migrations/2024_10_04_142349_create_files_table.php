@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('path');
             $table->string('note');
             $table->timestamps();
-            $table->softDeletes();
 
             $table->foreign('partner_id')->references('id')->on('partners')->onDelete('cascade');
             $table->foreign('type_id')->references('id')->on('types')->onDelete('cascade');
