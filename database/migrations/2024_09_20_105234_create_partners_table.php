@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->string('npwp')->nullable();
             $table->text('description');
+            $table->boolean('is_verified')->default(false);
             $table->timestamps();
         });
     }

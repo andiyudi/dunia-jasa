@@ -12,6 +12,7 @@ Route::get('category/data', [CategoryController::class, 'getData'])->name('categ
 Route::post('partner/check', [PartnerController::class, 'checkName'])->name('partner.check');
 Route::get('partner/{partner}/upload', [PartnerController::class, 'upload'])->name('partner.upload');
 Route::post('partner/{partner}/save', [PartnerController::class, 'save'])->name('partner.save');
+Route::delete('partner/{partner}/remove', [PartnerController::class, 'remove'])->name('partner.remove');
 Route::get('type/data', [TypeController::class, 'getData'])->name('type.data');
 
 

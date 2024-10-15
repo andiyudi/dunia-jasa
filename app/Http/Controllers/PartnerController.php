@@ -23,9 +23,11 @@ class PartnerController extends Controller
         if ($request->ajax()) {
             $partners = Partner::query()
             ->with('categories', 'brands', 'users') // Eager load relationships
-            ->whereHas('users', function($query) {
-                // Filter partners by the authenticated user
-                $query->where('user_id', auth()->id());
+            ->when(!auth()->user()->is_admin, function ($query) {
+                // Filter partners by the authenticated user only if not admin
+                $query->whereHas('users', function($q) {
+                    $q->where('user_id', auth()->id());
+                });
             })
             ->orderBy('created_at', 'desc'); // Order by created_at descending to get the most recent first
             // Filter by category if provided
@@ -244,7 +246,7 @@ class PartnerController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function remove($id)
     {
         $userId = Auth::id();
 
@@ -259,13 +261,62 @@ class PartnerController extends Controller
                 $partner->brands()->delete();  // Assuming 'brands' is the relationship method in Partner
                 $partner->categories()->detach(); // Remove all relationships with categories
                 $partner->delete(); // Delete the partner if no users are left
-                return redirect()->route('partner.index')->with('success', 'User has been removed and the partner has been deleted.');
+                return redirect()->route('partner.index')->with('success', 'You have been removed from the partner, and the partner has been deleted as it has no more associated users.');
             }
 
-            return redirect()->route('partner.index')->with('success', 'User has been removed from the partner.');
+            return redirect()->route('partner.index')->with('success', 'You have been removed from the partner.');
         } catch (\Exception $e) {
             \Log::error('Error removing user from partner: ' . $e->getMessage());
-            return redirect()->route('partner.index')->with('error', 'Failed to remove user from partner. Please try again.');
+            return redirect()->route('partner.index')->with('error', 'Failed to remove you from the partner. Please try again.');
+        }
+    }
+
+    public function destroy($id)
+    {
+        // Ensure only admin can perform this action
+        if (!Auth::user()->is_admin) {
+            return redirect()->route('partner.index')->with('error', 'You do not have permission to delete partners.');
+        }
+
+        try {
+            // Find the partner or throw a 404
+            $partner = Partner::findOrFail($id);
+
+            // Start a database transaction
+            DB::beginTransaction();
+
+            // Log the deletion attempt
+            \Log::info("Admin user " . Auth::id() . " is attempting to delete partner " . $id);
+
+            // Delete related brands
+            $deletedBrands = $partner->brands()->delete();
+            \Log::info("Deleted {$deletedBrands} related brands for partner {$id}");
+
+            // Detach all categories
+            $detachedCategories = $partner->categories()->detach();
+            \Log::info("Detached {$detachedCategories} categories from partner {$id}");
+
+            // Detach all users
+            $detachedUsers = $partner->users()->detach();
+            \Log::info("Detached {$detachedUsers} users from partner {$id}");
+
+            // Delete the partner
+            $partner->delete();
+            \Log::info("Successfully deleted partner {$id}");
+
+            // Commit the transaction
+            DB::commit();
+
+            return redirect()->route('partner.index')->with('success', 'Partner has been successfully deleted.');
+        } catch (\Exception $e) {
+            // Something went wrong, rollback the transaction
+            DB::rollBack();
+
+            // Log the error
+            \Log::error('Error deleting partner: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+
+            return redirect()->route('partner.index')->with('error', 'Failed to delete partner. Please try again or contact support.');
         }
     }
 

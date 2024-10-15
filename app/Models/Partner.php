@@ -16,6 +16,7 @@ class Partner extends Model
         'name',
         'description',
         'npwp',
+        'is_verified',
     ];
 
     public function users()

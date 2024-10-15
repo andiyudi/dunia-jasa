@@ -117,6 +117,7 @@ $pretitle = 'Data';
         const brandGroup = document.getElementById('brand-group');
         const addBrandButton = document.querySelector('.add-brand');
         const categoryCheckboxes = document.querySelectorAll('[name="category[]"]');
+        const form = document.getElementById('vendor-form');
 
         // Disable the Add Brand button initially
         addBrandButton.disabled = true;
@@ -164,9 +165,18 @@ $pretitle = 'Data';
 
         // Check name availability when the user stops typing
         nameInput.addEventListener('blur', function () {
-            const name = nameInput.value;
+            const name = nameInput.value.trim();
 
             if (name) {
+                // Disable the name input immediately
+                nameInput.readOnly = true;
+
+                // Show loading indicator
+                const loadingIndicator = document.createElement('div');
+                loadingIndicator.id = 'loading-indicator';
+                loadingIndicator.textContent = 'Checking name...';
+                nameInput.parentNode.appendChild(loadingIndicator);
+
                 // Make an AJAX request to check if the name exists
                 fetch('{{ route('partner.check') }}', {
                     method: 'POST',
@@ -178,19 +188,22 @@ $pretitle = 'Data';
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (!data.exists) {
-                        toggleReadOnlyFields(false);
-                        nameInput.setAttribute('readonly', true);
-                    } else {
+                    // Remove loading indicator
+                    document.getElementById('loading-indicator').remove();
+
+                    if (data.exists) {
+                        // Name exists, populate fields and keep name input readonly
                         npwpField.value = data.npwp || '';
                         descriptionField.value = data.description || '';
                         toggleReadOnlyFields(false);
+
                         if (data.categories && data.categories.length > 0) {
                             data.categories.forEach(categoryId => {
                                 const checkbox = document.querySelector(`#check-${categoryId}`);
                                 if (checkbox) checkbox.checked = true;
                             });
                         }
+
                         if (data.brands && data.brands.length > 0) {
                             brandGroup.innerHTML = '';
                             data.brands.forEach(brand => {
@@ -204,9 +217,33 @@ $pretitle = 'Data';
                             });
                             updateBrandListeners();
                         }
+                    } else {
+                        // Name doesn't exist, allow editing other fields
+                        toggleReadOnlyFields(false);
                     }
+
+                    // Keep name input readonly in both cases
+                    nameInput.readOnly = true;
+
+                    // Update Add Brand button state
+                    toggleAddBrandButton();
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Remove loading indicator
+                    document.getElementById('loading-indicator').remove();
+                    // Re-enable name input in case of error
+                    nameInput.readOnly = false;
+                    alert('An error occurred while checking the name. Please try again.');
+                });
+            }
+        });
+
+        // Prevent form submission if name is empty
+        form.addEventListener('submit', function(event) {
+            if (!nameInput.value.trim()) {
+                event.preventDefault();
+                alert('Please enter a name before submitting the form.');
             }
         });
 
@@ -216,7 +253,7 @@ $pretitle = 'Data';
         // Event listener for the Add Brand button
         addBrandButton.addEventListener('click', addBrandInput);
     });
-    </script>
+</script>
 
 @endsection
 

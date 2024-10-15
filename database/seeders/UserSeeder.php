@@ -38,5 +38,16 @@ class UserSeeder extends Seeder
             'is_admin' => false,
             'email_verified_at' => Carbon::now(), // email sudah terverifikasi
         ]);
+        User::create([
+            'name' => 'Standard User',
+            'firstname' => 'Standard',
+            'lastname' => 'User',
+            'phone' => '087889987456',
+            'email' => 'test@example.com',
+            'password' => bcrypt('12345678'), // ganti dengan password yang diinginkan
+            'avatar' => null,
+            'is_admin' => false,
+            'email_verified_at' => Carbon::now(), // email sudah terverifikasi
+        ]);
     }
 }

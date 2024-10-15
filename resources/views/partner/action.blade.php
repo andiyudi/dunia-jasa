@@ -1,4 +1,4 @@
-@if(Auth::user()->partners->contains($data->id))
+@if(Auth::user()->is_admin || Auth::user()->partners->contains($data->id))
 <div class="d-grid gap-2 col-8 mx-auto">
     <a href="{{ route($route.'.edit', encrypt($data->id)) }}" class="btn btn-sm btn-warning action icon icon-left">
         <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
@@ -21,29 +21,39 @@
             <polyline points="16 16 12 12 8 16"/>
         </svg>
     </a>
-    <button class="btn btn-sm btn-danger action icon icon-left delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="{{ $data->id }}">
-        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
-            <polyline points="3 6 5 6 21 6"></polyline>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            <line x1="10" y1="11" x2="10" y2="17"></line>
-            <line x1="14" y1="11" x2="14" y2="17"></line>
-        </svg>
-    </button>
+    @if(Auth::user()->is_admin)
+        <button class="btn btn-sm btn-danger action icon icon-left delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $data->id }}" data-id="{{ $data->id }}">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+        </button>
+    @else
+        <button class="btn btn-sm btn-danger action icon icon-left remove-btn" data-bs-toggle="modal" data-bs-target="#removeModal-{{ $data->id }}" data-id="{{ $data->id }}">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+        </button>
+    @endif
 </div>
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+<!-- Delete Confirmation Modal (for admin) -->
+@if(Auth::user()->is_admin)
+<div class="modal fade" id="deleteModal-{{ $data->id }}" tabindex="-1" aria-labelledby="deleteModalLabel-{{ $data->id }}" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                <h5 class="modal-title" id="deleteModalLabel-{{ $data->id }}">Confirm Deletion</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to remove this partner from your account? This action cannot be undone.
+                Are you sure you want to delete this partner? This action cannot be undone.
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form id="deleteForm" method="POST" action="{{ route($route.'.destroy', $data->id) }}">
+                <form id="deleteForm-{{ $data->id }}" method="POST" action="{{ route($route.'.destroy', $data->id) }}">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger">Delete</button>
@@ -52,4 +62,53 @@
         </div>
     </div>
 </div>
+@else
+<!-- Remove Confirmation Modal (for non-admin users) -->
+<div class="modal fade" id="removeModal-{{ $data->id }}" tabindex="-1" aria-labelledby="removeModalLabel-{{ $data->id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="removeModalLabel-{{ $data->id }}">Confirm Removal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to remove this partner from your account? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="removeForm-{{ $data->id }}" method="POST" action="{{ route($route.'.remove', $data->id) }}">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Remove</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 @endif
+@endif
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // For admin delete buttons
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const partnerId = this.getAttribute('data-id');
+                const form = document.getElementById('deleteForm-' + partnerId);
+                if (form) {
+                    form.action = "{{ route($route.'.destroy', '') }}/" + partnerId;
+                }
+            });
+        });
+
+        // For non-admin remove buttons
+        document.querySelectorAll('.remove-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const partnerId = this.getAttribute('data-id');
+                const form = document.getElementById('removeForm-' + partnerId);
+                if (form) {
+                    form.action = "{{ route($route.'.remove', '') }}/" + partnerId;
+                }
+            });
+        });
+    });
+    </script>
