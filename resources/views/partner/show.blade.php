@@ -120,7 +120,26 @@ $pretitle = 'Data';
     <!-- Back Button -->
     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
         <a href="{{ route('partner.index') }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left-circle"></i> Back
+            Back
         </a>
+
+        @if(auth()->user()->is_admin)  <!-- Cek apakah pengguna adalah admin -->
+            <form action="{{ route('partner.verify', $partner->id) }}" method="POST" style="display:inline;">
+                @csrf
+                @method('PATCH')
+
+                @if($partner->is_verified == false)
+                    <!-- Tombol Verifikasi -->
+                    <button type="submit" class="btn btn-success">
+                        Verify
+                    </button>
+                @else
+                    <!-- Tombol Batal Verifikasi -->
+                    <button type="submit" class="btn btn-danger">
+                        Cancel
+                    </button>
+                @endif
+            </form>
+        @endif
     </div>
 @endsection

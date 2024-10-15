@@ -84,8 +84,16 @@ class PartnerController extends Controller
                     $route = 'partner';
                     return view('partner.action', compact('route', 'data'));
                 })
+                ->editColumn('is_verified', function ($data) {
+                    if ($data->is_verified == 0) {
+                        return '<span class="badge bg-info">Process</span>';
+                    } elseif ($data->is_verified == 1) {
+                        return '<span class="badge bg-success">Verified</span>';
+                    }
+                    return '<span class="badge text-bg-dark">Unknown</span>';
+                })
                 ->addIndexColumn()
-                ->rawColumns(['categories', 'brand', 'email', 'pic', 'contact'])
+                ->rawColumns(['categories', 'brand', 'email', 'pic', 'contact', 'is_verified'])
                 ->make(true);
         }
 
@@ -226,6 +234,30 @@ class PartnerController extends Controller
         return view ('partner.show', compact('partner'));
     }
 
+    public function verify($id)
+    {
+        DB::beginTransaction(); // Memulai transaksi
+
+        try {
+            // Cari partner berdasarkan ID
+            $partner = Partner::findOrFail($id);
+
+            // Jika sudah diverifikasi, batalkan verifikasi (set is_verified = false)
+            // Jika belum, lakukan verifikasi (set is_verified = true)
+            $partner->is_verified = !$partner->is_verified;
+            $partner->save();
+
+            DB::commit(); // Commit transaksi jika semua berjalan lancar
+
+            $message = $partner->is_verified ? 'Partner verified successfully!' : 'Partner verification canceled!';
+            return redirect()->route('partner.index')->with('success', $message);
+        } catch (\Exception $e) {
+            DB::rollBack(); // Rollback jika terjadi kesalahan
+
+            return redirect()->route('partner.index')->with('error', 'Failed to update verification status. Please try again.');
+        }
+    }
+
     /**
      * Show the form for editing the specified resource.
      */
@@ -339,7 +371,7 @@ class PartnerController extends Controller
         $request->validate([
             'company_profile' => 'required|file|mimes:pdf|max:2048', // PDF file with a max size of 2MB
             'type_id' => 'required|exists:types,id', // Validates that the selected type exists in the types table
-            'notes' => 'nullable|string|max:255', // Optional notes with a max length of 255 characters
+            'notes' => 'required|string|max:255', // Optional notes with a max length of 255 characters
         ]);
 
         try {

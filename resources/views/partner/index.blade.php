@@ -40,6 +40,7 @@ $pretitle = 'Data';
                         <th style="text-align:center">PIC</th>
                         <th style="text-align:center">Email</th>
                         <th style="text-align:center">Contact</th>
+                        <th style="text-align:center">Verified</th>
                         <th style="text-align:center">Action</th>
                     </tr>
                 </thead>
@@ -87,6 +88,7 @@ $pretitle = 'Data';
                     { data: 'pic', name: 'pic', orderable: false, searchable: false },
                     { data: 'email', name: 'email', orderable: false, searchable: false },
                     { data: 'contact', name: 'contact', orderable: false, searchable: false },
+                    { data: 'is_verified', name: 'is_verified', orderable: false, searchable: false },
                     { data: 'action', name: 'action', orderable: false, searchable: false }
                 ]
             });

@@ -13,6 +13,7 @@ Route::post('partner/check', [PartnerController::class, 'checkName'])->name('par
 Route::get('partner/{partner}/upload', [PartnerController::class, 'upload'])->name('partner.upload');
 Route::post('partner/{partner}/save', [PartnerController::class, 'save'])->name('partner.save');
 Route::delete('partner/{partner}/remove', [PartnerController::class, 'remove'])->name('partner.remove');
+Route::patch('partner/{partner}/verify', [PartnerController::class, 'verify'])->name('partner.verify');
 Route::get('type/data', [TypeController::class, 'getData'])->name('type.data');
 
 
