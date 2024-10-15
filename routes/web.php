@@ -14,6 +14,7 @@ Route::get('partner/{partner}/upload', [PartnerController::class, 'upload'])->na
 Route::post('partner/{partner}/save', [PartnerController::class, 'save'])->name('partner.save');
 Route::delete('partner/{partner}/remove', [PartnerController::class, 'remove'])->name('partner.remove');
 Route::patch('partner/{partner}/verify', [PartnerController::class, 'verify'])->name('partner.verify');
+Route::delete('partner/delete/{fileId}', [PartnerController::class, 'fileDelete'])->name('partner.file-delete');
 Route::get('type/data', [TypeController::class, 'getData'])->name('type.data');
 
 

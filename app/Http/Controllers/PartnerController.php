@@ -264,13 +264,15 @@ class PartnerController extends Controller
     public function edit($encryptPartnerId)
     {
         $id = decrypt($encryptPartnerId);
-        dd($id);
+        $categories = Category::all();
+        $partner = Partner::findOrFail($id);
+        return view('partner.edit', compact('partner', 'categories'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Partner $partner)
+    public function update(Request $request, $encryptPartnerId)
     {
         //
     }
@@ -278,8 +280,9 @@ class PartnerController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function remove($id)
+    public function remove($encryptPartnerId)
     {
+        $id = decrypt($encryptPartnerId);
         $userId = Auth::id();
 
         try {
@@ -303,8 +306,9 @@ class PartnerController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy($encryptPartnerId)
     {
+        $id = decrypt($encryptPartnerId);
         // Ensure only admin can perform this action
         if (!Auth::user()->is_admin) {
             return redirect()->route('partner.index')->with('error', 'You do not have permission to delete partners.');
@@ -457,6 +461,38 @@ class PartnerController extends Controller
         }
 
         throw new \Exception('Failed to create or find Google Drive folder.');
+    }
+
+    public function fileDelete($fileId)
+    {
+        try {
+            // Start a database transaction
+            DB::beginTransaction();
+
+            // Find the file
+            $file = File::findOrFail($fileId);
+
+            // Delete the file from storage
+            if (Storage::exists($file->path)) {
+                Storage::delete($file->path);
+            }
+
+            // Delete the file record from the database
+            $file->delete();
+
+            // Commit the transaction
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'File deleted successfully']);
+        } catch (\Exception $e) {
+            // Rollback the transaction in case of error
+            DB::rollBack();
+
+            // Log the error
+            \Log::error('Error deleting file: ' . $e->getMessage());
+
+            return response()->json(['success' => false, 'message' => 'Failed to delete file'], 500);
+        }
     }
 
 }

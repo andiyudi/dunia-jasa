@@ -106,7 +106,7 @@ $pretitle = 'Data';
                                 <td>{{ $file->note }}</td>
                                 <td>
                                     <a href="{{ $file->path }}" target="_blank" class="btn btn-primary btn-sm">
-                                        <i class="bi bi-download"></i> Download
+                                        Download
                                     </a>
                                 </td>
                             </tr>
