@@ -6,7 +6,7 @@ $pretitle = 'Data';
 @endphp
 <h3>Edit Partner</h3>
 <div>
-    <form id="vendor-form" action="{{ route('partner.update', $partner->id) }}" method="POST" enctype="multipart/form-data">
+    <form id="vendor-form" action="{{ route('partner.update', encrypt($partner->id)) }}" method="POST" enctype="multipart/form-data">
     @csrf
     @method('PUT')
     <div class="row">
@@ -15,6 +15,7 @@ $pretitle = 'Data';
             <div class="mb-3">
                 <label for="name" class="form-label">Name</label>
                 <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $partner->name) }}" placeholder="Input Name">
+                <div id="name-error" class="invalid-feedback"></div>
                 @error('name')
                 <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -71,7 +72,7 @@ $pretitle = 'Data';
     <div class="row">
         <div class="col mb-3">
             <label for="brand" class="form-label">Brand</label>
-            <button type="button" class="btn btn-success add-brand float-end mb-3">+</button>
+            <button type="button" class="btn btn-primary add-brand float-end mb-3">+</button>
             <div id="brand-group" class="mt-2">
                 @foreach(old('brand', $partner->brands) as $brand)
                 <div class="input-group mb-2">
@@ -89,7 +90,10 @@ $pretitle = 'Data';
     <!-- Display existing files -->
     <div class="row">
         <div class="col mb-3">
-            <label class="form-label">Existing Files</label>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label">Existing Files</label>
+                <a href="{{ route('partner.upload', encrypt($partner->id)) }}" class="btn btn-primary">Upload New File</a>
+            </div>
             @if($partner->files->isEmpty())
                 <p>No files uploaded yet.</p>
             @else
@@ -106,8 +110,7 @@ $pretitle = 'Data';
                     <tbody>
                         @foreach($partner->files as $index => $file)
                             <tr>
-                                {{-- <td>{{ $index + 1 }}</td> --}}
-                                <td>{{ $file->id }}</td>
+                                <td>{{ $index + 1 }}</td>
                                 <td>{{ $file->name }}</td>
                                 <td>{{ $file->type->name ?? 'N/A' }}</td>
                                 <td>{{ $file->note }}</td>
@@ -122,34 +125,77 @@ $pretitle = 'Data';
         </div>
     </div>
 
-    <!-- PIC, Email, and Contact fields (always readonly) -->
-    <div class="row">
-        <div class="col mb-3">
-            <label for="pic" class="form-label">PIC</label>
-            <input type="text" class="form-control" name="pic" value="{{ auth()->user()->name }}" readonly>
-        </div>
-
-        <div class="col mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="text" class="form-control" name="email" value="{{ auth()->user()->email }}" readonly>
-        </div>
-
-        <div class="col mb-3">
-            <label for="contact" class="form-label">Contact</label>
-            <input type="text" class="form-control" name="contact" value="{{ auth()->user()->phone }}" readonly>
-        </div>
-    </div>
-
     <!-- Submit button -->
     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
         <a href="{{ route('partner.index') }}" type="button" class="btn btn-secondary">Back</a>
-        <button type="submit" class="btn btn-success">Update</button>
+        <button type="submit" class="btn btn-success" id="update-button">Update</button>
     </div>
     </form>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
+    // Name check functionality
+    const nameInput = document.getElementById('name');
+    const nameError = document.getElementById('name-error');
+    const updateButton = document.getElementById('update-button');
+    const form = document.getElementById('vendor-form');
+    const originalName = '{{ $partner->name }}';
+    let isNameValid = true;
+
+    nameInput.addEventListener('blur', function() {
+        if (this.value !== originalName) {
+            checkName(this.value);
+        } else {
+            nameError.textContent = '';
+            nameInput.classList.remove('is-invalid');
+            updateButton.disabled = false;
+            isNameValid = true;
+        }
+    });
+
+    function checkName(name) {
+        fetch('{{ route("partner.check") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ name: name })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.exists) {
+                nameError.textContent = 'This name already exists. Please choose a different name.';
+                nameInput.classList.add('is-invalid');
+                updateButton.disabled = true;
+                isNameValid = false;
+            } else {
+                nameError.textContent = '';
+                nameInput.classList.remove('is-invalid');
+                updateButton.disabled = false;
+                isNameValid = true;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            isNameValid = false;
+        });
+    }
+
+    form.addEventListener('submit', function(e) {
+        if (nameInput.value !== originalName) {
+            e.preventDefault();
+            checkName(nameInput.value);
+            setTimeout(() => {
+                if (isNameValid) {
+                    form.submit();
+                }
+            }, 500);
+        }
+    });
+
     const brandGroup = document.getElementById('brand-group');
     const addBrandButton = document.querySelector('.add-brand');
 
@@ -185,36 +231,61 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize listeners for existing remove buttons
     updateBrandListeners();
 
-    // Handle file deletion
+    // Handle file deletion with SweetAlert2
     const deleteFileButtons = document.querySelectorAll('.delete-file');
     deleteFileButtons.forEach(button => {
         button.addEventListener('click', function() {
-            if (confirm('Are you sure you want to delete this file?')) {
-                const fileId = this.getAttribute('data-file-id');
-                fetch(`{{ route('partner.file-delete', '') }}/${fileId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                    },
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        this.closest('tr').remove();
-                        if (document.querySelectorAll('.delete-file').length === 0) {
-                            document.querySelector('.table').remove();
-                            document.querySelector('.col.mb-3').innerHTML += '<p>No files uploaded yet.</p>';
+            const fileId = this.getAttribute('data-file-id');
+            const row = this.closest('tr');
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`{{ route('partner.file-delete', '') }}/${fileId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire(
+                                'Deleted!',
+                                'Your file has been deleted.',
+                                'success'
+                            );
+                            row.remove();
+                            if (document.querySelectorAll('.delete-file').length === 0) {
+                                document.querySelector('.table').remove();
+                                document.querySelector('.col.mb-3').innerHTML += '<p>No files uploaded yet.</p>';
+                            }
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                'Failed to delete the file. Please try again.',
+                                'error'
+                            );
                         }
-                    } else {
-                        alert('Failed to delete the file. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while deleting the file.');
-                });
-            }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire(
+                            'Error!',
+                            'An error occurred while deleting the file.',
+                            'error'
+                        );
+                    });
+                }
+            });
         });
     });
 });

@@ -274,7 +274,67 @@ class PartnerController extends Controller
      */
     public function update(Request $request, $encryptPartnerId)
     {
-        //
+        $id = decrypt($encryptPartnerId);
+        $partner = Partner::findOrFail($id);
+
+        // Validate the request data
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'npwp' => 'required|string|max:255',
+            'description' => 'required|string',
+            'category' => 'required|array',
+            'category.*' => 'exists:categories,id',
+            'brand' => 'required|array',
+            'brand.*' => 'string|max:255',
+        ]);
+
+        // Check if the name already exists (excluding the current partner)
+        $existingPartner = Partner::where('name', $validatedData['name'])
+                                ->where('id', '!=', $id)
+                                ->first();
+
+        if ($existingPartner) {
+            return back()->withErrors(['name' => 'This name already exists. Please choose a different name.'])
+                        ->withInput();
+        }
+
+        // Start database transaction
+        DB::beginTransaction();
+
+        try {
+            // Update the partner
+            $partner->update([
+                'name' => $validatedData['name'],
+                'npwp' => $validatedData['npwp'],
+                'description' => $validatedData['description'],
+            ]);
+
+            // Sync categories
+            $partner->categories()->sync($validatedData['category']);
+
+            // Update brands
+            if ($request->has('brand')) {
+                $inputBrands = $validatedData['brand'];
+
+                // Remove brands not in the new input
+                $partner->brands()->whereNotIn('name', $inputBrands)->delete();
+
+                // Add or keep existing brands
+                foreach ($inputBrands as $brandName) {
+                    $partner->brands()->firstOrCreate(['name' => $brandName]);
+                }
+            } else {
+                // If no brands are provided, remove all existing brands
+                $partner->brands()->delete();
+            }
+
+            DB::commit();
+            return redirect()->route('partner.index')->with('success', 'Partner updated successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'An error occurred while updating the partner. Please try again.'])
+                        ->withInput();
+        }
     }
 
     /**

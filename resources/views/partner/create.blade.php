@@ -70,7 +70,7 @@ $pretitle = 'Data';
     <div class="row">
         <div class="col mb-3">
             <label for="brand" class="form-label">Brand</label>
-            <button type="button" class="btn btn-success add-brand float-end mb-3">+</button> <!-- Separate Add button -->
+            <button type="button" class="btn btn-primary add-brand float-end mb-3">+</button> <!-- Separate Add button -->
             <div id="brand-group" class="mt-2"> <!-- Input groups for brands will go here -->
                 <div class="input-group mb-2">
                     <input type="text" class="form-control @error('brand.*') is-invalid @enderror" name="brand[]" placeholder="Input Brand" readonly>
