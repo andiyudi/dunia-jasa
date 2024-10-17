@@ -7,7 +7,7 @@ $pretitle = 'Data';
 @endphp
 <h3>Upload</h3>
 <div>
-    <form id="vendor-upload" action="{{ route('partner.save', $partner->id) }}" method="POST" enctype="multipart/form-data">
+    <form id="vendor-upload" action="{{ route('partner.save', encrypt($partner->id)) }}" method="POST" enctype="multipart/form-data">
     @csrf
     <div class="row mb-3">
         <!-- Type Selection -->
@@ -32,6 +32,7 @@ $pretitle = 'Data';
         <div class="row mb-3">
             <div class="col-md-3">
                 <label for="company_profile" class="form-label">Document (PDF)</label>
+                <small class="form-text text-muted">Max 2MB</small>
             </div>
             <div class="col-md-9">
                 <input type="file" class="form-control @error('company_profile') is-invalid @enderror" id="company_profile" name="company_profile" accept=".pdf">
@@ -53,12 +54,13 @@ $pretitle = 'Data';
                 @enderror
             </div>
         </div>
-
-    <!-- Submit button -->
-    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-        <a href="{{ route('partner.index') }}" type="button" class="btn btn-secondary">Back</a>
-        <button type="submit" class="btn btn-success">Upload</button>
-    </div>
+        <div class="row mb-3">
+            <!-- Submit button -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{ route('partner.index') }}" type="button" class="btn btn-secondary">Back</a>
+                <button type="submit" class="btn btn-success">Upload</button>
+            </div>
+        </div>
     </form>
 </div>
 @endsection

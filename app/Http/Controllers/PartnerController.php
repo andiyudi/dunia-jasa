@@ -115,10 +115,13 @@ class PartnerController extends Controller
     public function checkName(Request $request)
     {
         // Validate that 'name' is present in the request
-        $request->validate(['name' => 'required|string']);
+        $validatedData = $request->validate(['name' => 'required|string']);
+
+        // Strip any potential HTML/PHP tags from 'name'
+        $cleanName = strip_tags($validatedData['name']);
 
         // Search for vendor by name and include brands and categories
-        $vendor = Partner::where('name', $request->name)
+        $vendor = Partner::where('name', $cleanName)
             ->with(['brands', 'categories']) // Include brands and categories relationships
             ->first();
 
@@ -126,16 +129,17 @@ class PartnerController extends Controller
         if ($vendor) {
             return response()->json([
                 'exists' => true,
-                'npwp' => $vendor->npwp,
-                'description' => $vendor->description,
+                'npwp' => e($vendor->npwp), // Escape NPWP to avoid XSS
+                'description' => e($vendor->description), // Escape description
                 'categories' => $vendor->categories->pluck('id'), // Get related category IDs
-                'brands' => $vendor->brands->pluck('name'), // Get related brand names
+                'brands' => $vendor->brands->pluck('name')->map('e'), // Escape each brand name
             ]);
         }
 
         // If vendor is not found
         return response()->json(['exists' => false]);
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -149,13 +153,22 @@ class PartnerController extends Controller
                 'string',
                 'max:255',
             ],
-            'npwp' => 'required|string|max:15',
-            'description' => 'required|string', // Allow null for description
+            'npwp' => 'required|string|max:20',
+            'description' => 'required|string', // not allow null for description
             'brand' => 'required|array', // Brands must be an array
             'brand.*' => 'required|string|max:255', // Each brand must be a string
             'category' => 'required|array', // Categories must be an array
             'category.*' => 'exists:categories,id', // Categories must exist in the database
         ]);
+
+        // Bersihkan tag PHP atau HTML dari input
+        $validatedData['name'] = strip_tags($validatedData['name']);
+        $validatedData['npwp'] = strip_tags($validatedData['npwp']);
+        $validatedData['description'] = strip_tags($validatedData['description']);
+
+        foreach ($validatedData['brand'] as &$brandName) {
+            $brandName = strip_tags($brandName);
+        }
 
         DB::beginTransaction();
 
@@ -196,13 +209,10 @@ class PartnerController extends Controller
 
                 // Loop untuk menambahkan atau mempertahankan brand yang ada
                 foreach ($inputBrands as $brandName) {
-                    // Cek apakah brand sudah ada
-                    $existingBrand = $partner->brands()->where('name', $brandName)->first();
-
-                    // Jika brand belum ada, buat yang baru
-                    if (!$existingBrand) {
-                        $partner->brands()->create(['name' => $brandName]);
-                    }
+                    $partner->brands()->updateOrCreate(
+                        ['name' => $brandName], // Kondisi untuk update atau create
+                        ['name' => $brandName] // Data yang akan dibuat atau diperbarui
+                    );
                 }
             }
 
@@ -234,8 +244,9 @@ class PartnerController extends Controller
         return view ('partner.show', compact('partner'));
     }
 
-    public function verify($id)
+    public function verify($encryptPartnerId)
     {
+        $id = decrypt($encryptPartnerId);
         DB::beginTransaction(); // Memulai transaksi
 
         try {
@@ -287,6 +298,15 @@ class PartnerController extends Controller
             'brand' => 'required|array',
             'brand.*' => 'string|max:255',
         ]);
+
+        // Bersihkan tag HTML atau PHP dari input untuk mencegah XSS
+        $validatedData['name'] = strip_tags($validatedData['name']);
+        $validatedData['npwp'] = strip_tags($validatedData['npwp']);
+        $validatedData['description'] = strip_tags($validatedData['description']);
+
+        foreach ($validatedData['brand'] as &$brandName) {
+            $brandName = strip_tags($brandName);
+        }
 
         // Check if the name already exists (excluding the current partner)
         $existingPartner = Partner::where('name', $validatedData['name'])
@@ -426,9 +446,10 @@ class PartnerController extends Controller
         return view('partner.upload', compact('partner', 'types'));
     }
 
-    public function save(Request $request, $id)
+    public function save(Request $request, $encryptPartnerId)
     {
-        // Dekripsi partner_id dari route
+        // decrypt partner_id dari route
+        $id = decrypt($encryptPartnerId);
         $partnerId = $id;
 
         // Validate the incoming request
@@ -462,13 +483,16 @@ class PartnerController extends Controller
                     // Generate the public URL for the uploaded file
                     $filePath = Storage::disk('google')->url($folderId . '/' . $fileName); // Construct the URL
 
+                      // Sanitize the 'notes' field to remove any potential XSS risk
+                    $sanitizedNotes = strip_tags($request->input('notes'));
+
                     // Save the file information to the database
                     $fileData = [
                         'partner_id' => $partnerId, // Ambil partner_id dari route
                         'type_id' => $request->input('type_id'),
                         'name' => $fileName,
                         'path' => $filePath, // Path on Google Drive for download
-                        'note' => $request->input('notes'), // Optional notes
+                        'note' => $sanitizedNotes, // Sanitized notes
                     ];
 
                     File::create($fileData); // Create a new entry in the files table

@@ -234,7 +234,13 @@ $pretitle = 'Data';
                     document.getElementById('loading-indicator').remove();
                     // Re-enable name input in case of error
                     nameInput.readOnly = false;
-                    alert('An error occurred while checking the name. Please try again.');
+                    // Use SweetAlert to display the error
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'An error occurred while checking the name. Please try again.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 });
             }
         });
@@ -243,7 +249,13 @@ $pretitle = 'Data';
         form.addEventListener('submit', function(event) {
             if (!nameInput.value.trim()) {
                 event.preventDefault();
-                alert('Please enter a name before submitting the form.');
+                // Use SweetAlert to alert the user
+                Swal.fire({
+                    title: 'Missing Name',
+                    text: 'Please enter a name before submitting the form.',
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                });
             }
         });
 

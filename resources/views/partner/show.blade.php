@@ -3,6 +3,14 @@
 @php
 $title    = 'Show';
 $pretitle = 'Data';
+// Jika user adalah admin
+if (auth()->user()->is_admin) {
+        if ($partner->is_verified == false) {
+            $title .= ' And Verify'; // Tambahkan "Verify" jika belum diverifikasi
+        } else {
+            $title .= ' And Cancel Verify'; // Tambahkan "Cancel" jika sudah diverifikasi
+        }
+    }
 @endphp
 
     <!-- Partner Information Section -->
@@ -124,22 +132,42 @@ $pretitle = 'Data';
         </a>
 
         @if(auth()->user()->is_admin)  <!-- Cek apakah pengguna adalah admin -->
-            <form action="{{ route('partner.verify', $partner->id) }}" method="POST" style="display:inline;">
+            <button type="button" class="btn @if($partner->is_verified == false) btn-success @else btn-danger @endif" id="verifyButton">
+                @if($partner->is_verified == false)
+                    Verify
+                @else
+                    Cancel
+                @endif
+            </button>
+            <form id="verifyForm" action="{{ route('partner.verify', encrypt($partner->id)) }}" method="POST" style="display:none;">
                 @csrf
                 @method('PATCH')
-
-                @if($partner->is_verified == false)
-                    <!-- Tombol Verifikasi -->
-                    <button type="submit" class="btn btn-success">
-                        Verify
-                    </button>
-                @else
-                    <!-- Tombol Batal Verifikasi -->
-                    <button type="submit" class="btn btn-danger">
-                        Cancel
-                    </button>
-                @endif
             </form>
         @endif
     </div>
+
+<!-- SweetAlert Script for Verification Confirmation -->
+<script>
+    document.getElementById('verifyButton').addEventListener('click', function () {
+        let isVerified = {{ $partner->is_verified ? 'true' : 'false' }};
+        let confirmText = isVerified ? 'Cancel verification?' : 'Verify this partner?';
+        let buttonText = isVerified ? 'Yes, cancel it!' : 'Yes, verify it!';
+        let successText = isVerified ? 'Verification cancelled!' : 'Partner verified!';
+        let btnClass = isVerified ? 'btn-danger' : 'btn-success';
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: confirmText,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: buttonText,
+            cancelButtonText: 'No, cancel!',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('verifyForm').submit();
+            }
+        });
+    });
+</script>
 @endsection
