@@ -36,7 +36,7 @@
                         </li>
                     <li class='sidebar-title'>Jobs</li>
                     <li class="sidebar-item">
-                        <a href="#" class='sidebar-link'>
+                        <a href="{{ route('tender.index') }}" class='sidebar-link'>
                             <i data-feather="list" width="20"></i>
                             <span>List Procurement</span>
                         </a>

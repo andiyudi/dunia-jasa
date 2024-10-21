@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TenderController;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\ProfileController;
@@ -29,6 +30,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 Route::middleware(['auth', 'verified'])->group(function(){
     Route::resource('category', CategoryController::class);
     Route::resource('partner', PartnerController::class);
+    Route::resource('tender', TenderController::class);
     Route::resource('type', TypeController::class);
 });
 

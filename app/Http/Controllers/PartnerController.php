@@ -516,36 +516,62 @@ class PartnerController extends Controller
      */
     private function createOrFindGoogleDriveFolder($folderName)
     {
-        // Check if the folder exists in Google Drive
-        $folders = Storage::disk('google')->listContents('/', false);
+        // Step 1: Find or create the "Vendors" folder
+        $parentFolderName = 'VENDORS';
+        $parentFolderId = null;
 
-        // Manually search for a folder with the specific folder name
-        $folderId = null;
+        // Check if the "Vendors" folder exists
+        $folders = Storage::disk('google')->listContents('/', false);
         foreach ($folders as $folder) {
-            if ($folder->type() === 'dir' && basename($folder->path()) === $folderName) {
-                $folderId = $folder->path();
+            if ($folder->type() === 'dir' && basename($folder->path()) === $parentFolderName) {
+                $parentFolderId = $folder->path();
                 break;
             }
         }
 
-        // If the folder is found, return the folder ID
-        if ($folderId) {
-            return $folderId;
-        } else {
-            // If the folder does not exist, create it
-            Storage::disk('google')->makeDirectory($folderName);
-
-            // List contents again to get the newly created folder ID
+        // If "Vendors" folder doesn't exist, create it
+        if (!$parentFolderId) {
+            Storage::disk('google')->makeDirectory($parentFolderName);
+            // List contents again to get the newly created "Vendors" folder ID
             $folders = Storage::disk('google')->listContents('/', false);
             foreach ($folders as $folder) {
+                if ($folder->type() === 'dir' && basename($folder->path()) === $parentFolderName) {
+                    $parentFolderId = $folder->path();
+                    break;
+                }
+            }
+        }
+
+        if (!$parentFolderId) {
+            throw new \Exception('Failed to create or find "Vendors" folder.');
+        }
+
+        // Step 2: Find or create the partner-specific folder within the "Vendors" folder
+        $partnerFolderId = null;
+        $partnerFolders = Storage::disk('google')->listContents($parentFolderId, false);
+
+        foreach ($partnerFolders as $folder) {
+            if ($folder->type() === 'dir' && basename($folder->path()) === $folderName) {
+                $partnerFolderId = $folder->path();
+                break;
+            }
+        }
+
+        // If the partner folder doesn't exist, create it inside the "Vendors" folder
+        if (!$partnerFolderId) {
+            Storage::disk('google')->makeDirectory($parentFolderId . '/' . $folderName);
+            // List contents again to get the newly created partner folder ID
+            $partnerFolders = Storage::disk('google')->listContents($parentFolderId, false);
+            foreach ($partnerFolders as $folder) {
                 if ($folder->type() === 'dir' && basename($folder->path()) === $folderName) {
                     return $folder->path();
                 }
             }
         }
 
-        throw new \Exception('Failed to create or find Google Drive folder.');
+        return $partnerFolderId;
     }
+
 
     public function fileDelete($fileId)
     {
