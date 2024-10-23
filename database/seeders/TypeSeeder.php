@@ -22,5 +22,16 @@ class TypeSeeder extends Seeder
         foreach ($types as $type) {
             Type::create(['name' => $type]);
         }
+        // Logika untuk memperbarui kolom category
+        $categories = [
+            'Compro' => 'Legal',
+            'Legalitas 1' => 'Legal',
+            'Legalitas 2' => 'Legal',
+            'Legalitas 3' => 'Legal',
+        ];
+
+        foreach ($categories as $name => $category) {
+            Type::where('name', $name)->update(['category' => $category]);
+        }
     }
 }

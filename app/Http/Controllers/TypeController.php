@@ -19,7 +19,7 @@ class TypeController extends Controller
     public function getData()
     {
         // Ambil semua data kategori dari database
-        $types = Type::select(['id','name']);
+        $types = Type::select(['id','name','category']);
 
         // Return data dalam format DataTables
         return DataTables::of($types)
@@ -48,11 +48,13 @@ class TypeController extends Controller
         // Validasi input
         $request->validate([
             'name' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
         ]);
 
         // Simpan data kategori baru
         Type::create([
             'name' => $request->name,
+            'category' => $request->category,
         ]);
 
         // Return response sukses
@@ -83,6 +85,7 @@ class TypeController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
         ]);
 
         $type = Type::find($id);

@@ -15,6 +15,7 @@ $pretitle = 'Master';
                 <tr>
                     <th>No</th>
                     <th>Name</th>
+                    <th>Category</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -36,6 +37,10 @@ $pretitle = 'Master';
                             <label for="name" class="form-label">Type Name</label>
                             <input type="text" class="form-control" id="name" name="name" required>
                         </div>
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category Type</label>
+                            <input type="text" class="form-control" id="category" name="category" required>
+                        </div>
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <button type="submit" class="btn btn-success" id="save-btn">Save</button>
                         </div>
@@ -55,6 +60,7 @@ $pretitle = 'Master';
                 columns: [
                     { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                     { data: 'name', name: 'name' },
+                    { data: 'category', name: 'category' },
                     { data: 'action', name: 'action', orderable: false, searchable: false }
                 ]
             });
@@ -111,6 +117,7 @@ $pretitle = 'Master';
                     $('#type-modal').modal('show');
                     $('#type_id').val(data.id);
                     $('#name').val(data.name);
+                    $('#category').val(data.category);
                 });
             });
 

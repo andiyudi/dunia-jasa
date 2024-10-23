@@ -441,7 +441,7 @@ class PartnerController extends Controller
         $id = decrypt($encryptPartnerId);
         $partner = Partner::find($id);
 
-        $types = Type::all();
+        $types = Type::where('category', 'Legal')->get();
 
         return view('partner.upload', compact('partner', 'types'));
     }

@@ -34,8 +34,6 @@ $pretitle = 'Data';
                     <th>Location</th>
                     <th>Estimation</th>
                     <th>Status</th>
-                    <th>Document</th>
-                    <th>Quotation</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -59,8 +57,6 @@ $pretitle = 'Data';
                 {data: 'location', name: 'location'},
                 {data: 'estimation', name: 'estimation'},
                 {data: 'status', name: 'status', orderable: false, searchable: false},
-                {data: 'document', name: 'document', orderable: false, searchable: false},
-                {data: 'quotation', name: 'quotation', orderable: false, searchable: false},
                 {data: 'action', name: 'action', orderable: false, searchable: false}
             ]
         });

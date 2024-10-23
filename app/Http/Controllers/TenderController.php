@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Type;
 use App\Models\Tender;
 use App\Models\Partner;
 use App\Models\Category;
@@ -89,32 +90,49 @@ class TenderController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Tender $tender)
+    public function show($encryptTenderId)
     {
-        //
+        $id = decrypt($encryptTenderId);
+        dd($id);
+        $tender = Tender::find($id);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Tender $tender)
+    public function edit($encryptTenderId)
     {
-        //
+        $id = decrypt($encryptTenderId);
+        dd($id);
+        $tender = Tender::find($id);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Tender $tender)
+    public function update(Request $request, $encryptTenderId)
     {
-        //
+        $id = decrypt($encryptTenderId);
+        dd($id);
+        $tender = Tender::find($id);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Tender $tender)
+    public function destroy($encryptTenderId)
     {
-        //
+        $id = decrypt($encryptTenderId);
+        dd($id);
+        $tender = Tender::find($id);
+    }
+
+    public function upload($encryptTenderId)
+    {
+        $id = decrypt($encryptTenderId);
+        dd($id);
+        $tender = Tender::find($id);
+
+        $types = Type::where('category', 'Tender')->get();
     }
 }
