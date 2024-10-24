@@ -190,7 +190,12 @@ $pretitle = 'Data';
                 // Tutup modal
                 $('#itemsModal').modal('hide');
             } else {
-                alert('Please fill all fields');
+                Swal.fire({
+                title: "Error",
+                text: "Please fill all fields",
+                icon: "error",
+                button: "OK",
+                });
             }
         });
 
