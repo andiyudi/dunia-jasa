@@ -6,6 +6,7 @@ use App\Models\Type;
 use App\Models\Tender;
 use App\Models\Partner;
 use App\Models\Category;
+use App\Models\TenderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -83,6 +84,12 @@ class TenderController extends Controller
                 'estimation' => 'required|string|max:255',
                 'category_id' => 'required|exists:categories,id',
                 'partner_id' => 'required|exists:partners,id',
+                // Validasi array item tender
+                'items.description.*' => 'required|string|max:255',
+                'items.specification.*' => 'required|string|max:255',
+                'items.quantity.*' => 'required|integer|min:1',
+                'items.satuan.*' => 'required|string|max:255',
+                'items.unit.*' => 'required|string|max:255',
             ]);
 
             // Ambil user yang sedang login
@@ -107,7 +114,19 @@ class TenderController extends Controller
             unset($validatedData['partner_id']);
 
             // Buat tender baru menggunakan data yang tervalidasi
-            Tender::create($validatedData);
+            $tender = Tender::create($validatedData);
+
+            // Simpan item tender ke dalam tabel tender_items
+            foreach ($request->items['description'] as $index => $description) {
+                TenderItem::create([
+                    'tender_id'     => $tender->id,
+                    'description'   => $description,
+                    'specification' => $request->items['specification'][$index],
+                    'quantity'      => $request->items['quantity'][$index],
+                    'satuan'        => $request->items['satuan'][$index],
+                    'unit'          => $request->items['unit'][$index],
+                ]);
+            }
 
             // Redirect ke route index dengan pesan sukses
             return redirect()->route('tender.index')->with('success', 'Tender created successfully.');

@@ -28,4 +28,9 @@ class Tender extends Model
     {
         return $this->belongsToMany(Partner::class, 'partner_user', 'id', 'partner_id', 'partner_user_id');
     }
+
+    public function items()
+    {
+        return $this->hasMany(TenderItem::class);
+    }
 }
