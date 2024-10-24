@@ -38,9 +38,4 @@ class Partner extends Model
     {
         return $this->hasMany(File::class, 'partner_id');
     }
-
-    public function tenders()
-    {
-        return $this->hasMany(Tender::class, 'partner_id');
-    }
 }

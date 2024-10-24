@@ -15,7 +15,7 @@ class Tender extends Model
         'location',
         'estimation',
         'category_id',
-        'partner_id',
+        'partner_user_id',
         'status',
     ];
 
@@ -26,6 +26,6 @@ class Tender extends Model
 
     public function partner()
     {
-        return $this->belongsTo(Partner::class, 'partner_id');
+        return $this->belongsToMany(Partner::class, 'partner_user', 'id', 'partner_id', 'partner_user_id');
     }
 }

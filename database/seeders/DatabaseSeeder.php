@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             TypeSeeder::class,
             UserSeeder::class,
+            PartnerSeeder::class,
         ]);
         // User::factory(10)->create();
 

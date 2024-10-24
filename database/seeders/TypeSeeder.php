@@ -13,25 +13,14 @@ class TypeSeeder extends Seeder
     public function run(): void
     {
         $types = [
-            'Compro',
-            'Legalitas 1',
-            'Legalitas 2',
-            'Legalitas 3',
+            ['name' => 'Compro', 'category' => 'Legal'],
+            ['name' => 'Legalitas 1', 'category' => 'Legal'],
+            ['name' => 'Legalitas 2', 'category' => 'Legal'],
+            ['name' => 'Legalitas 3', 'category' => 'Legal'],
         ];
 
         foreach ($types as $type) {
-            Type::create(['name' => $type]);
-        }
-        // Logika untuk memperbarui kolom category
-        $categories = [
-            'Compro' => 'Legal',
-            'Legalitas 1' => 'Legal',
-            'Legalitas 2' => 'Legal',
-            'Legalitas 3' => 'Legal',
-        ];
-
-        foreach ($categories as $name => $category) {
-            Type::where('name', $name)->update(['category' => $category]);
+            Type::create($type); // Memasukkan 'name' dan 'category' secara bersamaan
         }
     }
 }

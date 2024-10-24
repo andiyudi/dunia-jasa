@@ -17,12 +17,12 @@ return new class extends Migration
             $table->string('location');
             $table->string('estimation');
             $table->unsignedBigInteger('category_id');
-            $table->unsignedBigInteger('partner_id');
+            $table->unsignedBigInteger('partner_user_id');
             $table->boolean('status')->default(false);
             $table->timestamps();
 
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
-            $table->foreign('partner_id')->references('id')->on('partners')->onDelete('cascade');
+            $table->foreign('partner_user_id')->references('id')->on('partner_user')->onDelete('cascade');
         });
     }
 

@@ -7,6 +7,7 @@ use App\Models\Tender;
 use App\Models\Partner;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -18,7 +19,7 @@ class TenderController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = Tender::latest()->get();
+            $data = Tender::with('partner', 'category')->latest()->get(); // Tambahkan eager loading
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->editColumn('status', function ($data) {
@@ -30,7 +31,7 @@ class TenderController extends Controller
                     return '<span class="badge text-bg-dark">Unknown</span>';
                 })
                 ->editColumn('partner', function($data) {
-                    return $data->partner->name ?? 'Unknown'; // Misalkan ada relasi ke tabel 'Company'
+                    return $data->partner->first()->name ?? 'Unknown';
                 })
                 ->editColumn('category', function($data) {
                     return $data->category->name ?? 'Unknown'; // Misalkan ada relasi ke tabel 'Category'
@@ -74,17 +75,46 @@ class TenderController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'location' => 'required|string|max:255',
-            'estimation' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'partner_id' => 'required|exists:partners,id',
-        ]);
+        try {
+            // Validasi input dari form
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+                'location' => 'required|string|max:255',
+                'estimation' => 'required|string|max:255',
+                'category_id' => 'required|exists:categories,id',
+                'partner_id' => 'required|exists:partners,id',
+            ]);
 
-        Tender::create($validatedData);
+            // Ambil user yang sedang login
+            $user = auth()->user();
 
-        return redirect()->route('tender.index')->with('success', 'Tender created successfully.');
+            // Cari partner_user_id berdasarkan partner_id dan user_id dari tabel pivot partner_user
+            $partnerUser = DB::table('partner_user')
+                ->where('partner_id', $validatedData['partner_id'])
+                ->where('user_id', $user->id)
+                ->first();
+
+            // Debugging tambahan jika partnerUser tidak ditemukan
+            if (!$partnerUser) {
+                // Kode ini akan dijalankan jika tidak ada data di pivot table
+                return redirect()->back()->withErrors(['error' => 'You do not have permission to use this partner.']);
+            }
+
+            // Jika partnerUser ditemukan, lanjutkan
+            $validatedData['partner_user_id'] = $partnerUser->id;
+
+            // Hapus partner_id karena kita tidak lagi membutuhkannya
+            unset($validatedData['partner_id']);
+
+            // Buat tender baru menggunakan data yang tervalidasi
+            Tender::create($validatedData);
+
+            // Redirect ke route index dengan pesan sukses
+            return redirect()->route('tender.index')->with('success', 'Tender created successfully.');
+        } catch (\Exception $e) {
+            // Jika ada error, tangkap dan kembalikan pesan error
+            return redirect()->back()->withErrors(['error' => 'There was an error creating the tender: ' . $e->getMessage()]);
+        }
     }
 
     /**
