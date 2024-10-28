@@ -76,6 +76,8 @@ class TenderController extends Controller
      */
     public function store(Request $request)
     {
+        DB::beginTransaction(); // Memulai transaksi database
+
         try {
             // Validasi input dari form
             $validatedData = $request->validate([
@@ -88,7 +90,6 @@ class TenderController extends Controller
                 'items.description.*' => 'required|string|max:255',
                 'items.specification.*' => 'required|string|max:255',
                 'items.quantity.*' => 'required|integer|min:1',
-                'items.satuan.*' => 'required|string|max:255',
                 'items.unit.*' => 'required|string|max:255',
             ]);
 
@@ -103,7 +104,8 @@ class TenderController extends Controller
 
             // Debugging tambahan jika partnerUser tidak ditemukan
             if (!$partnerUser) {
-                // Kode ini akan dijalankan jika tidak ada data di pivot table
+                // Jika partnerUser tidak ditemukan, batalkan transaksi
+                DB::rollBack();
                 return redirect()->back()->withErrors(['error' => 'You do not have permission to use this partner.']);
             }
 
@@ -112,26 +114,38 @@ class TenderController extends Controller
 
             // Hapus partner_id karena kita tidak lagi membutuhkannya
             unset($validatedData['partner_id']);
+            $validatedData['name'] = strip_tags($validatedData['name']);
+            $validatedData['location'] = strip_tags($validatedData['location']);
+            $validatedData['estimation'] = strip_tags($validatedData['estimation']);
 
             // Buat tender baru menggunakan data yang tervalidasi
             $tender = Tender::create($validatedData);
 
             // Simpan item tender ke dalam tabel tender_items
             foreach ($request->items['description'] as $index => $description) {
+                $description = strip_tags($description);
+                $specification = strip_tags($request->items['specification'][$index]);
+                $quantity = (int)$request->items['quantity'][$index];
+                $unit = strip_tags($request->items['unit'][$index]);
                 TenderItem::create([
                     'tender_id'     => $tender->id,
                     'description'   => $description,
-                    'specification' => $request->items['specification'][$index],
-                    'quantity'      => $request->items['quantity'][$index],
-                    'satuan'        => $request->items['satuan'][$index],
-                    'unit'          => $request->items['unit'][$index],
+                    'specification' => $specification,
+                    'quantity'      => $quantity,
+                    'unit'          => $unit,
                 ]);
             }
+
+            // Jika semua proses berhasil, lakukan commit pada transaksi
+            DB::commit();
 
             // Redirect ke route index dengan pesan sukses
             return redirect()->route('tender.index')->with('success', 'Tender created successfully.');
         } catch (\Exception $e) {
-            // Jika ada error, tangkap dan kembalikan pesan error
+            // Jika ada error, rollback semua perubahan yang dilakukan
+            DB::rollBack();
+
+            // Kembalikan pesan error
             return redirect()->back()->withErrors(['error' => 'There was an error creating the tender: ' . $e->getMessage()]);
         }
     }

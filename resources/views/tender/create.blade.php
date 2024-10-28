@@ -98,7 +98,6 @@ $pretitle = 'Data';
                             <th>Specification</th>
                             <th>Quantity</th>
                             <th>Unit</th>
-                            <th>Satuan</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -136,15 +135,11 @@ $pretitle = 'Data';
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label for="modal-quantity" class="form-label">Quantity</label>
                         <input type="number" id="modal-quantity" class="form-control">
                     </div>
-                    <div class="col-md-4">
-                        <label for="modal-satuan" class="form-label">Satuan</label>
-                        <input type="text" id="modal-satuan" class="form-control">
-                    </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label for="modal-unit" class="form-label">Unit</label>
                         <input type="text" id="modal-unit" class="form-control">
                     </div>
@@ -163,10 +158,9 @@ $pretitle = 'Data';
             var description = $('#modal-description').val();
             var specification = $('#modal-specification').val();
             var quantity = $('#modal-quantity').val();
-            var satuan = $('#modal-satuan').val();
             var unit = $('#modal-unit').val();
 
-            if (description && specification && quantity && satuan && unit) {
+            if (description && specification && quantity && unit) {
                 // Tambahkan row baru ke tabel tender items
                 var newRow = `
                     <tr>
@@ -174,7 +168,6 @@ $pretitle = 'Data';
                         <td>${specification}<input type="hidden" name="items[specification][]" value="${specification}"></td>
                         <td>${quantity}<input type="hidden" name="items[quantity][]" value="${quantity}"></td>
                         <td>${unit}<input type="hidden" name="items[unit][]" value="${unit}"></td>
-                        <td>${satuan}<input type="hidden" name="items[satuan][]" value="${satuan}"></td>
                         <td><button type="button" class="btn btn-danger remove-item">Remove</button></td>
                     </tr>
                 `;
@@ -184,7 +177,6 @@ $pretitle = 'Data';
                 $('#modal-description').val('');
                 $('#modal-specification').val('');
                 $('#modal-quantity').val('');
-                $('#modal-satuan').val('');
                 $('#modal-unit').val('');
 
                 // Tutup modal

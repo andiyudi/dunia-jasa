@@ -11,7 +11,6 @@ class TenderItem extends Model
         'description',
         'specification',
         'quantity',
-        'satuan',
         'unit',
     ];
 

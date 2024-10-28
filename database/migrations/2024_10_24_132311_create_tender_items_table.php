@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('description'); // Nama item
             $table->string('specification'); // Spesifikasi item
             $table->integer('quantity'); // Kuantitas item
-            $table->string('satuan');
             $table->string('unit');
             $table->timestamps();
         });
