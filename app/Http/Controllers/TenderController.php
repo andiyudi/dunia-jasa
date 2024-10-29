@@ -91,6 +91,7 @@ class TenderController extends Controller
                 'items.specification.*' => 'required|string|max:255',
                 'items.quantity.*' => 'required|integer|min:1',
                 'items.unit.*' => 'required|string|max:255',
+                'items.delivery.*' => 'required|string|max:255',
             ]);
 
             // Ambil user yang sedang login
@@ -127,12 +128,14 @@ class TenderController extends Controller
                 $specification = strip_tags($request->items['specification'][$index]);
                 $quantity = (int)$request->items['quantity'][$index];
                 $unit = strip_tags($request->items['unit'][$index]);
+                $delivery = strip_tags($request->items['delivery'][$index]);
                 TenderItem::create([
                     'tender_id'     => $tender->id,
                     'description'   => $description,
                     'specification' => $specification,
                     'quantity'      => $quantity,
                     'unit'          => $unit,
+                    'delivery'          => $delivery,
                 ]);
             }
 

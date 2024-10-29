@@ -12,6 +12,7 @@ class TenderItem extends Model
         'specification',
         'quantity',
         'unit',
+        'delivery',
     ];
 
     public function tender()

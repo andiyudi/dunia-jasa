@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('specification'); // Spesifikasi item
             $table->integer('quantity'); // Kuantitas item
             $table->string('unit');
+            $table->string('delivery');
             $table->timestamps();
         });
     }
