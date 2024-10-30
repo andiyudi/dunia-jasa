@@ -26,7 +26,7 @@ $pretitle = 'Data';
                         <!-- Admin can select any partner -->
                         <div class="form-group">
                             <label for="partner_id" class="form-label">Select Partner</label>
-                            <select name="partner_id" id="partner_id" class="form-control" required>
+                            <select name="partner_id" id="partner_id" class="form-control">
                                 @foreach($partners as $partner)
                                     <option value="{{ $partner->id }}">{{ $partner->name }}</option>
                                 @endforeach
@@ -36,7 +36,7 @@ $pretitle = 'Data';
                         <!-- Verified partner can select from their list -->
                         <div class="form-group">
                             <label for="partner_id" class="form-label">Select Partner</label>
-                            <select name="partner_id" id="partner_id" class="form-control" required>
+                            <select name="partner_id" id="partner_id" class="form-control">
                                 @foreach($partners as $partner)
                                     <option value="{{ $partner->id }}">{{ $partner->name }}</option>
                                 @endforeach
@@ -51,7 +51,7 @@ $pretitle = 'Data';
                 <!-- Category -->
                 <div class="form-group">
                     <label for="category_id" class="form-label">Category</label>
-                    <select name="category_id" id="category_id" class="form-control" required>
+                    <select name="category_id" id="category_id" class="form-control">
                         @foreach($categories as $category)
                             <option value="{{ $category->id }}">{{ $category->name }}</option>
                         @endforeach
@@ -63,7 +63,7 @@ $pretitle = 'Data';
             <!-- Tender Name -->
             <div class="form-group">
                 <label for="name" class="form-label">Tender Name</label>
-                <textarea type="text" name="name" id="name" class="form-control" required></textarea>
+                <textarea type="text" name="name" id="name" class="form-control"></textarea>
             </div>
         </div>
         <div class="row">
@@ -71,14 +71,14 @@ $pretitle = 'Data';
                 <!-- Location -->
                 <div class="form-group">
                     <label for="location" class="form-label">Location</label>
-                    <input type="text" name="location" id="location" class="form-control" required>
+                    <input type="text" name="location" id="location" class="form-control">
                 </div>
             </div>
             <div class="col-md-6">
                 <!-- Estimation -->
                 <div class="form-group">
                     <label for="estimation" class="form-label">Estimation</label>
-                    <input type="text" name="estimation" id="estimation" class="form-control" required>
+                    <input type="text" name="estimation" id="estimation" class="form-control">
                 </div>
             </div>
         </div>
@@ -94,7 +94,7 @@ $pretitle = 'Data';
                                 name="types[{{ $type->id }}]"
                                 class="form-control mb-3"
                                 placeholder="Upload {{ $type->name }}"
-                                required>
+                                accept=".pdf">
                                 <small class="form-text text-muted">PDF Max 2MB</small>
                         </div>
                     </div>

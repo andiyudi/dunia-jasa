@@ -98,6 +98,7 @@ class TenderController extends Controller
                 'items.delivery.*' => 'required|string|max:255',
                 //validasi file
                 'types.*' => 'required|file|mimes:pdf|max:2048', // Adjust mime types and size as needed
+                'notes.*' => 'required|string|max:255', // Adjust max length as needed
             ]);
 
             // Ambil user yang sedang login
