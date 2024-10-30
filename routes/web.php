@@ -9,7 +9,6 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 
 
-Route::get('tender/{tender}/upload', [TenderController::class, 'upload'])->name('tender.upload');
 Route::get('category/data', [CategoryController::class, 'getData'])->name('category.data');
 Route::post('partner/check', [PartnerController::class, 'checkName'])->name('partner.check');
 Route::get('partner/{partner}/upload', [PartnerController::class, 'upload'])->name('partner.upload');

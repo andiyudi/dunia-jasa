@@ -8,8 +8,10 @@ use App\Models\Partner;
 use App\Models\Category;
 use App\Models\TenderItem;
 use Illuminate\Http\Request;
+use App\Models\TenderDocument;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
 
 class TenderController extends Controller
@@ -67,8 +69,9 @@ class TenderController extends Controller
             }
         }
         $categories = Category::all();
+        $types = Type::where('category', 'Tender')->get();
 
-        return view('tender.create', compact('partners', 'categories'));
+        return view('tender.create', compact('partners', 'categories', 'types'));
     }
 
     /**
@@ -76,6 +79,7 @@ class TenderController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request->all());
         DB::beginTransaction(); // Memulai transaksi database
 
         try {
@@ -92,6 +96,8 @@ class TenderController extends Controller
                 'items.quantity.*' => 'required|integer|min:1',
                 'items.unit.*' => 'required|string|max:255',
                 'items.delivery.*' => 'required|string|max:255',
+                //validasi file
+                'types.*' => 'required|file|mimes:pdf|max:2048', // Adjust mime types and size as needed
             ]);
 
             // Ambil user yang sedang login
@@ -135,10 +141,17 @@ class TenderController extends Controller
                     'specification' => $specification,
                     'quantity'      => $quantity,
                     'unit'          => $unit,
-                    'delivery'          => $delivery,
+                    'delivery'      => $delivery,
                 ]);
             }
 
+            // Simpan file ke dalam tabel tender_documents
+            foreach ($request->types as $typeId => $file) {
+                if ($file->isValid()) {
+                    // Panggil metode upload untuk menyimpan file ke Google Drive
+                    $this->upload($tender->id, $file, $typeId, $request->notes[$typeId] ?? null);
+                }
+            }
             // Jika semua proses berhasil, lakukan commit pada transaksi
             DB::commit();
 
@@ -151,6 +164,108 @@ class TenderController extends Controller
             // Kembalikan pesan error
             return redirect()->back()->withErrors(['error' => 'There was an error creating the tender: ' . $e->getMessage()]);
         }
+    }
+
+    public function upload($tenderId, $file, $typeId, $notes)
+    {
+        // Begin DB transaction
+        DB::transaction(function () use ($file, $tenderId, $typeId, $notes) {
+            // Define the file name (use time to ensure unique file names)
+            $fileName = time() . '_' . $file->getClientOriginalName();
+
+            // Get the tender details
+            $tender = Tender::findOrFail($tenderId);
+            $tenderName = $tender->name; // Assuming 'name' is the column that stores the tender's name
+
+            // Create a folder name for the tender
+            $folderName = "{$tenderName}-{$tenderId}"; // Use tender name and ID in the folder name
+
+            // Create folder if it doesn't exist
+            $folderId = $this->createOrFindGoogleDriveFolder($folderName);
+
+            // Store the file in Google Drive inside the tender folder
+            Storage::disk('google')->putFileAs($folderId, $file, $fileName); // Upload to the tender's folder
+
+            // Generate the public URL for the uploaded file
+            $filePath = Storage::disk('google')->url($folderId . '/' . $fileName); // Construct the URL
+
+            // Sanitize the 'notes' field to remove any potential XSS risk
+            $sanitizedNotes = strip_tags($notes);
+
+            // Save the file information to the database
+            TenderDocument::create([
+                'tender_id' => $tenderId,
+                'type_id' => $typeId,
+                'name' => $fileName,
+                'path' => $filePath, // Path on Google Drive for download
+                'note' => $sanitizedNotes, // Sanitized notes
+            ]);
+        });
+    }
+
+
+    /**
+ * Creates or finds a folder on Google Drive by folder name
+ *
+ * @param string $folderName
+ * @return string Folder ID
+ */
+
+    private function createOrFindGoogleDriveFolder($folderName)
+    {
+        // Step 1: Find or create the "Tenders" folder
+        $parentFolderName = 'TENDERS';
+        $parentFolderId = null;
+
+        // Check if the "Tenders" folder exists
+        $folders = Storage::disk('google')->listContents('/', false);
+        foreach ($folders as $folder) {
+            if ($folder->type() === 'dir' && basename($folder->path()) === $parentFolderName) {
+                $parentFolderId = $folder->path();
+                break;
+            }
+        }
+
+        // If "Tenders" folder doesn't exist, create it
+        if (!$parentFolderId) {
+            Storage::disk('google')->makeDirectory($parentFolderName);
+            // List contents again to get the newly created "Tenders" folder ID
+            $folders = Storage::disk('google')->listContents('/', false);
+            foreach ($folders as $folder) {
+                if ($folder->type() === 'dir' && basename($folder->path()) === $parentFolderName) {
+                    $parentFolderId = $folder->path();
+                    break;
+                }
+            }
+        }
+
+        if (!$parentFolderId) {
+            throw new \Exception('Failed to create or find "Tenders" folder.');
+        }
+
+        // Step 2: Find or create the partner-specific folder within the "Vendors" folder
+        $tenderFolderId = null;
+        $tenderFolders = Storage::disk('google')->listContents($parentFolderId, false);
+
+        foreach ($tenderFolders as $folder) {
+            if ($folder->type() === 'dir' && basename($folder->path()) === $folderName) {
+                $tenderFolderId = $folder->path();
+                break;
+            }
+        }
+
+        // If the partner folder doesn't exist, create it inside the "Vendors" folder
+        if (!$tenderFolderId) {
+            Storage::disk('google')->makeDirectory($parentFolderId . '/' . $folderName);
+            // List contents again to get the newly created partner folder ID
+            $tenderFolders = Storage::disk('google')->listContents($parentFolderId, false);
+            foreach ($tenderFolders as $folder) {
+                if ($folder->type() === 'dir' && basename($folder->path()) === $folderName) {
+                    return $folder->path();
+                }
+            }
+        }
+        return $tenderFolderId;
     }
 
     /**
@@ -193,12 +308,4 @@ class TenderController extends Controller
         $tender = Tender::find($id);
     }
 
-    public function upload($encryptTenderId)
-    {
-        $id = decrypt($encryptTenderId);
-        dd($id);
-        $tender = Tender::find($id);
-
-        $types = Type::where('category', 'Tender')->get();
-    }
 }

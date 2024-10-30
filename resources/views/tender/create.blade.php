@@ -16,7 +16,7 @@ $pretitle = 'Data';
         </div>
     @endif
 
-    <form id="tender-form" action="{{ route('tender.store') }}" method="POST">
+    <form id="tender-form" action="{{ route('tender.store') }}" method="POST" enctype="multipart/form-data">
     @csrf
         <div class="row">
             <div class="col-md-6">
@@ -81,6 +81,32 @@ $pretitle = 'Data';
                     <input type="text" name="estimation" id="estimation" class="form-control" required>
                 </div>
             </div>
+        </div>
+        <!-- Penyesuaian Input untuk File Types -->
+        <div id="type-upload">
+            @foreach ($types as $type)
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="upload_{{ 'type_' . $type->id }}" class="form-label">{{ $type->name }}</label>
+                            <input type="file"
+                                id="upload_{{ $type->id }}"
+                                name="types[{{ $type->id }}]"
+                                class="form-control mb-3"
+                                placeholder="Upload {{ $type->name }}"
+                                required>
+                                <small class="form-text text-muted">PDF Max 2MB</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- Input untuk catatan -->
+                        <div class="form-group">
+                            <label for="note_{{ $type->id }}" class="form-label">Note for {{ $type->name }}</label>
+                            <textarea id="note_{{ $type->id }}" name="notes[{{ $type->id }}]" class="form-control mb-3" placeholder="Input your {{ $type->name }} description here" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
         </div>
         <div class="row">
             <div class="col form-group">

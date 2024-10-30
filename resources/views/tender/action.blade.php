@@ -15,14 +15,6 @@
             <line x1="12" y1="8" x2="12.01" y2="8"></line>
         </svg>
     </a>
-    <a href="{{ route($route.'.upload', $encryptTenderId) }}" class="btn btn-sm btn-primary action icon icon-left">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-upload-cloud">
-            <polyline points="16 16 12 12 8 16"/>
-            <line x1="12" y1="12" x2="12" y2="21"/>
-            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
-            <polyline points="16 16 12 12 8 16"/>
-        </svg>
-    </a>
     @if(Auth::user()->is_admin)
         <button class="btn btn-sm btn-danger action icon icon-left delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $encryptTenderId }}" data-id="{{ $encryptTenderId }}">
             <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">

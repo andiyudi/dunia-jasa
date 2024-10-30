@@ -33,4 +33,9 @@ class Tender extends Model
     {
         return $this->hasMany(TenderItem::class);
     }
+
+    public function documents()
+    {
+        return $this->hasMany(TenderDocument::class, 'tender_id');
+    }
 }

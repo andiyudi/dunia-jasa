@@ -13,10 +13,12 @@ class TypeSeeder extends Seeder
     public function run(): void
     {
         $types = [
-            ['name' => 'Compro', 'category' => 'Legal'],
+            ['name' => 'Company Profile', 'category' => 'Legal'],
             ['name' => 'Legalitas 1', 'category' => 'Legal'],
             ['name' => 'Legalitas 2', 'category' => 'Legal'],
             ['name' => 'Legalitas 3', 'category' => 'Legal'],
+            ['name' => 'KAK', 'category' => 'Tender'],
+            ['name' => 'BOQ', 'category' => 'Tender'],
         ];
 
         foreach ($types as $type) {

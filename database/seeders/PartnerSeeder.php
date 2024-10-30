@@ -26,6 +26,7 @@ class PartnerSeeder extends Seeder
                 'name' => $faker->company,
                 'npwp' => $faker->regexify('[0-9]{15}'), // Nomor NPWP 15 digit acak
                 'description' => $faker->sentence,
+                'is_verified' => true,
             ]);
 
             // Assign minimal 1 category secara acak ke setiap partner
@@ -43,8 +44,8 @@ class PartnerSeeder extends Seeder
                 }
             }
 
-            // Assign minimal 1 user ke setiap partner
-            $assignedUsers = $users->random(rand(1, 2)); // Minimal 1 user per partner
+            // Assign minimal 1 user ke setiap partner, excluding admin users
+            $assignedUsers = $users->where('is_admin', false)->random(rand(1, 2));
             $partner->users()->attach($assignedUsers);
         }
     }
