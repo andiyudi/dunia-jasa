@@ -22,7 +22,7 @@ class TenderController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = Tender::with('partner', 'category')->latest()->get(); // Tambahkan eager loading
+            $data = Tender::with('partner', 'category', 'documents.type')->latest()->get(); // Tambahkan eager loading
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->editColumn('status', function ($data) {
@@ -39,16 +39,32 @@ class TenderController extends Controller
                 ->editColumn('category', function($data) {
                     return $data->category->name ?? 'Unknown'; // Misalkan ada relasi ke tabel 'Category'
                 })
+                ->addColumn('document', function($data) {
+                    $url = route('tender.documents', $data->id);
+                    return '<button class="view-documents btn btn-primary btn-sm" data-url="' . $url . '">Download</button>';
+                })
                 ->addColumn('action', function($data){
                     $route = 'tender';
                     return view('tender.action', compact('route', 'data'));
                 })
-                ->rawColumns(['status', 'action'])
+                ->rawColumns(['status', 'action', 'document'])
                 ->make(true);
         }
         return view('tender.index');
     }
 
+    public function getDocuments(Tender $tender)
+    {
+        $documentsHtml = '<table class="table table-bordered"><thead><tr><th>Type</th><th>Name</th><th>Action</th></tr></thead><tbody>';
+        $documentsHtml .= $tender->documents->map(function ($doc) {
+            $downloadButton = "<a href='{$doc->path}' target='_blank' class='btn btn-primary btn-sm'>Download</a>";
+            return "<tr><td>{$doc->type->name}</td><td>{$doc->name}</td><td>{$downloadButton}</td></tr>";
+        })->implode('');
+        $documentsHtml .= '</tbody></table>';
+
+        return response()->json($documentsHtml);
+
+    }
     /**
      * Show the form for creating a new resource.
      */

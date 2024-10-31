@@ -33,11 +33,29 @@ $pretitle = 'Data';
                     <th>Tender</th>
                     <th>Location</th>
                     <th>Estimation</th>
+                    <th>Document</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
             </thead>
         </table>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="documentsModal" tabindex="-1" aria-labelledby="documentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="documentsModalLabel">Tender Documents</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Data dokumen dengan type_id akan dimuat di sini oleh JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
 </div>
 <script>
@@ -56,9 +74,21 @@ $pretitle = 'Data';
                 {data: 'name', name: 'name'},
                 {data: 'location', name: 'location'},
                 {data: 'estimation', name: 'estimation'},
+                {data: 'document', name: 'document'},
                 {data: 'status', name: 'status', orderable: false, searchable: false},
                 {data: 'action', name: 'action', orderable: false, searchable: false}
             ]
+        });
+    });
+    $(document).on('click', '.view-documents', function() {
+        var url = $(this).data('url');
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(data) {
+                $('#documentsModal .modal-body').html(data);
+                $('#documentsModal').modal('show');
+            }
         });
     });
 </script>
