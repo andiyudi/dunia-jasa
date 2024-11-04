@@ -19,4 +19,8 @@ class TenderItem extends Model
     {
         return $this->belongsTo(Tender::class);
     }
+
+    public function quotations() {
+        return $this->hasMany(Quotation::class);
+    }
 }

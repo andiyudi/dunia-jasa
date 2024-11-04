@@ -6,7 +6,7 @@
         <div class="sidebar-menu">
             <ul class="menu">
                 <li class='sidebar-title'>Main Menu</li>
-                    <li class="sidebar-item ">
+                    <li class="sidebar-item">
                         <a href="{{ route('dashboard') }}" class='sidebar-link'>
                             <i data-feather="home" width="20"></i>
                             <span>Dashboard</span>
@@ -28,7 +28,7 @@
                         </li>
                     @endif
                     <li class='sidebar-title'>Vendor</li>
-                        <li class="sidebar-item  ">
+                        <li class="sidebar-item">
                             <a href="{{ route('partner.index') }}" class='sidebar-link'>
                                 <i data-feather="clipboard" width="20"></i>
                                 <span>List Vendor</span>
@@ -37,8 +37,12 @@
                     <li class='sidebar-title'>Jobs</li>
                     <li class="sidebar-item">
                         <a href="{{ route('tender.index') }}" class='sidebar-link'>
-                            <i data-feather="list" width="20"></i>
+                            <i data-feather="more-vertical" width="20"></i>
                             <span>List Procurement</span>
+                        </a>
+                        <a href="#" class='sidebar-link'>
+                            <i data-feather="more-horizontal" width="20"></i>
+                            <span>List Tender</span>
                         </a>
                     </li>
                     <li class='sidebar-title'>Other</li>

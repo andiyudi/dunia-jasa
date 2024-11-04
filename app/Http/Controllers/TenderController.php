@@ -22,12 +22,20 @@ class TenderController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-             // Eager load necessary relationships and join with the partner_user table to get the user_id of the creator
+            // Get the current user's ID and check if they are an admin
+            $userId = auth()->user()->id;
+            $isAdmin = auth()->user()->is_admin;
+
+            // Eager load necessary relationships and join with the partner_user table to get the user_id of the creator
             $data = Tender::with(['partner', 'category', 'documents.type'])
-            ->select('tenders.*', 'partner_user.user_id as creator_id')
-            ->leftJoin('partner_user', 'tenders.partner_user_id', '=', 'partner_user.id')
-            ->latest()
-            ->get();
+                ->select('tenders.*', 'partner_user.user_id as creator_id')
+                ->leftJoin('partner_user', 'tenders.partner_user_id', '=', 'partner_user.id')
+                ->when(!$isAdmin, function ($query) use ($userId) {
+                    // Filter tenders to show only those created by the logged-in user if they are not an admin
+                    $query->where('partner_user.user_id', $userId);
+                })
+                ->latest()
+                ->get();
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->editColumn('status', function ($data) {
@@ -297,8 +305,25 @@ class TenderController extends Controller
     public function show($encryptTenderId)
     {
         $id = decrypt($encryptTenderId);
-        dd($id);
+        $categories = Category::all();
         $tender = Tender::find($id);
+        $types = Type::where('category', 'Tender')->get();
+        $user = Auth::user();
+        // Check if the user is an admin
+        if ($user->is_admin) {
+            // Admins can manage all partners or bypass restrictions
+            $partners = Partner::all(); // Admin can select any partner
+        } else {
+            // Regular user: retrieve only verified partners for the logged-in user
+            $partners = $user->partners()->where('is_verified', true)->get();
+
+            // If the user is not an admin and has no verified partners, redirect with an error
+            if ($partners->isEmpty()) {
+                return redirect()->route('tender.index')->with('error', 'You must have at least one verified partner to create a tender.');
+            }
+        }
+
+        return view('tender.show', compact('tender', 'partners', 'categories', 'types'));
     }
 
     /**
