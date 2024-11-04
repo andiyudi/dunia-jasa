@@ -22,7 +22,12 @@ class TenderController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = Tender::with('partner', 'category', 'documents.type')->latest()->get(); // Tambahkan eager loading
+             // Eager load necessary relationships and join with the partner_user table to get the user_id of the creator
+            $data = Tender::with(['partner', 'category', 'documents.type'])
+            ->select('tenders.*', 'partner_user.user_id as creator_id')
+            ->leftJoin('partner_user', 'tenders.partner_user_id', '=', 'partner_user.id')
+            ->latest()
+            ->get();
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->editColumn('status', function ($data) {
@@ -45,7 +50,8 @@ class TenderController extends Controller
                 })
                 ->addColumn('action', function($data){
                     $route = 'tender';
-                    return view('tender.action', compact('route', 'data'));
+                    $creatorId = $data->creator_id; // Retrieve the creator's user_id
+                    return view('tender.action', compact('route', 'data', 'creatorId'));
                 })
                 ->rawColumns(['status', 'action', 'document'])
                 ->make(true);
