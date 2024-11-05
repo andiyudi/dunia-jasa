@@ -1,12 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TenderController;
 use App\Http\Controllers\TypeController;
+use App\Http\Controllers\TenderController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\QuotationController;
 
 Route::get('tender/{tender}/documents', [TenderController::class, 'getDocuments'])->name('tender.documents');
 Route::get('category/data', [CategoryController::class, 'getData'])->name('category.data');
@@ -31,6 +32,7 @@ Route::middleware(['auth', 'verified'])->group(function(){
     Route::resource('category', CategoryController::class);
     Route::resource('partner', PartnerController::class);
     Route::resource('tender', TenderController::class);
+    Route::resource('quotation', QuotationController::class);
     Route::resource('type', TypeController::class);
 });
 

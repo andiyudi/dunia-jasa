@@ -40,7 +40,7 @@
                             <i data-feather="more-vertical" width="20"></i>
                             <span>List Procurement</span>
                         </a>
-                        <a href="#" class='sidebar-link'>
+                        <a href="{{ route('quotation.index') }}" class='sidebar-link'>
                             <i data-feather="more-horizontal" width="20"></i>
                             <span>List Tender</span>
                         </a>

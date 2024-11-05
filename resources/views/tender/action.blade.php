@@ -15,7 +15,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route($route.'.show', $encryptTenderId) }}" class="btn btn-sm btn-info">
+                        <a href="{{ route($route.'.show', $encryptTenderId) }}" class="dropdown-item">
                             Show
                         </a>
                     </li>
