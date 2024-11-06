@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tender;
+use App\Models\Quotation;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
+use App\Models\TenderItem;
 
 class QuotationController extends Controller
 {
@@ -93,7 +95,32 @@ class QuotationController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+        // Validate the form inputs
+        $validatedData = $request->validate([
+            'partner_id' => 'required|exists:partners,id',
+            'item_id' => 'required|exists:tender_items,id',
+            'price' => 'required|numeric|min:0',
+            'delivery_time' => 'required|string',
+            'remark' => 'nullable|string',
+        ]);
+
+        // Find the tender item to get the quantity
+        $tenderItem = TenderItem::findOrFail($validatedData['item_id']);
+
+        // Calculate total price
+        $totalPrice = $validatedData['price'] * $tenderItem->quantity;
+
+        // Create the quotation
+        $quotation = Quotation::create([
+            'tender_item_id' => $validatedData['item_id'],
+            'partner_user_id' => $validatedData['partner_id'],
+            'price' => $validatedData['price'],
+            'total_price' => $totalPrice,
+            'delivery_time' => $validatedData['delivery_time'],
+            'remark' => $validatedData['remark'],
+        ]);
+
+        return redirect()->back()->with('success', 'Quotation submitted successfully.');
     }
 
     /**

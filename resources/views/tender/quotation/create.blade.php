@@ -8,7 +8,6 @@
 
 <h3>Join - <span id="selected-partner-name"></span></h3> <!-- Display selected partner's name -->
 <div>
-
     <!-- Display errors -->
     @if($errors->any())
         <div class="alert alert-danger">
@@ -38,87 +37,44 @@
             </div>
         </div>
 
-        <!-- Tender Documents -->
-        <div class="col-md-12 mb-4">
-            <h5 class="bg-info text-white p-2">Tender Documents</h5>
-            <div class="p-3 border">
-                @if($tender->documents->isEmpty())
-                    <p>No documents available.</p>
-                @else
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Document Type</th>
-                                    <th>Document Name</th>
-                                    <th>Note</th>
-                                    <th>Download Link</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($tender->documents as $document)
-                                    <tr>
-                                        <td>{{ $document->type->name }}</td> <!-- Display document type name -->
-                                        <td>{{ $document->name }}</td> <!-- Document name -->
-                                        <td>{{ $document->note ?? 'No notes available' }}</td> <!-- Document note -->
-                                        <td>
-                                            <a href="{{ $document->path }}" target="_blank">Download</a>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @endif
-            </div>
+        <!-- Tender Items Section with Submit Button -->
+        <div class="col-md-12">
+            <h5 class="bg-secondary text-white p-2">Tender Items</h5>
         </div>
-
+        <div class="col-md-12 mb-3">
+            <button type="button" class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#submitQuotationModal" disabled id="submitQuotationItemButton">
+                Submit Quotation Item
+            </button>
+        </div>
 
         <!-- Tender Items Table -->
         <div class="col-md-12">
-            <h5 class="bg-secondary text-white p-2">Tender Items</h5>
             <div class="table-responsive">
-                <table class="table table-bordered">
+                <table class="table table-bordered" id="tenderItemsTable">
                     <thead class="table-light">
                         <tr>
-                            <th>Description</th>
-                            <th>Specification</th>
-                            <th>Quantity</th>
-                            <th>Unit</th>
-                            <th>Delivery</th>
-                            <th>Quotation</th>
+                            <th>Tender Items</th>
+                            <th>Price</th>
+                            <th>Delivery Time</th>
+                            <th>Remark</th>
                             <th>Total Price</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($tender->items as $item)
-                            <tr>
-                                <td>{{ $item->description }}</td>
-                                <td>{{ $item->specification }}</td>
-                                <td>{{ $item->quantity }}</td>
-                                <td>{{ $item->unit }}</td>
-                                <td>{{ $item->delivery }}</td>
-                                <td>
-                                    <!-- Button to trigger modal -->
-                                    <button type="button" class="btn btn-primary btn-sm submit-quotation-btn" data-bs-toggle="modal" data-bs-target="#quotationModal" data-item-id="{{ $item->id }}" disabled>
-                                        Submit Quotation
-                                    </button>
-                                </td>
-                                <td id="total-price-{{ $item->id }}">0</td> <!-- Display calculated total price -->
-                            </tr>
-                        @endforeach
+                        <!-- Rows will be added dynamically here -->
                     </tbody>
                 </table>
             </div>
         </div>
+
         <!-- File Upload Section -->
         <div class="col-md-12 mt-4">
             <h5 class="bg-warning text-white p-2">Upload Quotation Document</h5>
             <div class="p-3 border">
-                {{-- <form action="{{ route('tender.uploadDocument', $tender->id) }}" method="POST" enctype="multipart/form-data"> --}}
-                <form action="#" method="POST" enctype="multipart/form-data">
+                <form action="#" method="POST" enctype="multipart/form-data" id="uploadQuotationForm">
                     @csrf
-
+                    <div id="tenderItemsInputs"></div>
                     <div class="mb-3">
                         <label for="file" class="form-label">File</label>
                         <input type="file" class="form-control" id="file" name="file" required>
@@ -164,40 +120,47 @@
     </div>
 </div>
 
-<!-- Quotation Modal -->
-<div class="modal fade" id="quotationModal" tabindex="-1" aria-labelledby="quotationModalLabel" aria-hidden="true">
+<!-- Submit Quotation Modal -->
+<div class="modal fade" id="submitQuotationModal" tabindex="-1" aria-labelledby="submitQuotationModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="quotationModalLabel">Submit Quotation</h5>
+                <h5 class="modal-title" id="submitQuotationModalLabel">Submit Quotation</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="quotationForm" action="{{ route('quotation.store') }}" method="POST">
+            <form id="quotationForm" action="#" method="POST" onsubmit="addItemToTable(event)">
                 @csrf
                 <input type="hidden" name="partner_id" id="selected-partner-id">
-                <input type="hidden" name="item_id" id="item-id">
                 <div class="modal-body">
-                    <!-- Price input -->
+                    <div class="mb-3">
+                        <label for="item_id" class="form-label">Tender Item</label>
+                        <select class="form-select" id="item_id" name="item_id" required>
+                            <option value="" selected>Select an item</option>
+                            @foreach($tender->items as $item)
+                                <option value="{{ $item->id }}" data-quantity="{{ $item->quantity }}">{{ $item->description }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="mb-3">
                         <label for="price" class="form-label">Price</label>
                         <input type="number" class="form-control" id="price" name="price" required>
                     </div>
-
-                    <!-- Delivery Time input -->
                     <div class="mb-3">
                         <label for="delivery_time" class="form-label">Delivery Time</label>
                         <input type="text" class="form-control" id="delivery_time" name="delivery_time" required>
                     </div>
-
-                    <!-- Remark input -->
                     <div class="mb-3">
                         <label for="remark" class="form-label">Remark</label>
                         <textarea class="form-control" id="remark" name="remark" rows="3"></textarea>
                     </div>
+                    <div class="mb-3">
+                        <label>Total Price</label>
+                        <p id="total-price-display">0</p>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="submit" class="btn btn-primary">Add Item</button>
                 </div>
             </form>
         </div>
@@ -205,10 +168,10 @@
 </div>
 
 <script>
-        // Display the modal on page load
     document.addEventListener('DOMContentLoaded', function() {
-        // Enable Submit Quotation buttons only after partner selection
         document.getElementById('selectPartnerButton').addEventListener('click', selectPartner);
+        document.getElementById('price').addEventListener('input', calculateTotalPrice);
+        document.getElementById('item_id').addEventListener('change', calculateTotalPrice);
     });
 
     function selectPartner() {
@@ -216,12 +179,7 @@
         if (selectedPartner) {
             document.getElementById('selected-partner-id').value = selectedPartner.value;
             document.getElementById('selected-partner-name').textContent = selectedPartner.nextElementSibling.textContent;
-
-            // Enable Submit Quotation buttons
-            document.querySelectorAll('.submit-quotation-btn').forEach(function(button) {
-                button.disabled = false;
-            });
-
+            document.getElementById('submitQuotationItemButton').disabled = false;
             hideModal();
         } else {
             Swal.fire({
@@ -237,18 +195,55 @@
         document.getElementById('partnerSelectionModal').classList.remove('show', 'd-block');
     }
 
-    var quotationModal = document.getElementById('quotationModal');
-    quotationModal.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget;
-        var itemId = button.getAttribute('data-item-id');
-        document.getElementById('item-id').value = itemId;
+    function addItemToTable(event) {
+        event.preventDefault();
 
-        document.getElementById('price').addEventListener('input', function() {
-            const quantity = @json($tender->items->pluck('quantity', 'id'));
-            const price = this.value;
-            const totalPrice = price * quantity[itemId];
-            document.getElementById(`total-price-${itemId}`).textContent = totalPrice;
-        });
-    });
+        const itemSelect = document.getElementById('item_id');
+        const priceInput = document.getElementById('price').value;
+        const deliveryTimeInput = document.getElementById('delivery_time').value;
+        const remarkInput = document.getElementById('remark').value;
+        const totalPriceDisplay = document.getElementById('total-price-display').textContent;
+
+        const selectedItemText = itemSelect.options[itemSelect.selectedIndex].text;
+        const selectedItemValue = itemSelect.value;
+
+        const tbody = document.querySelector('#tenderItemsTable tbody');
+
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td>${selectedItemText}</td>
+            <td>${priceInput}</td>
+            <td>${deliveryTimeInput}</td>
+            <td>${remarkInput}</td>
+            <td>${totalPriceDisplay}</td>
+            <td><button type="button" class="btn btn-danger" onclick="removeRow(this)">Delete</button></td>
+        `;
+
+        tbody.appendChild(newRow);
+
+        const inputsContainer = document.getElementById('tenderItemsInputs');
+        inputsContainer.innerHTML += `
+            <input type="hidden" name="items[${selectedItemValue}][price]" value="${priceInput}">
+            <input type="hidden" name="items[${selectedItemValue}][delivery_time]" value="${deliveryTimeInput}">
+            <input type="hidden" name="items[${selectedItemValue}][remark]" value="${remarkInput}">
+            <input type="hidden" name="items[${selectedItemValue}][total_price]" value="${totalPriceDisplay}">
+        `;
+
+        document.getElementById('quotationForm').reset();
+        $('#submitQuotationModal').modal('hide');
+    }
+
+    function calculateTotalPrice() {
+        const itemSelect = document.getElementById('item_id');
+        const quantity = itemSelect.options[itemSelect.selectedIndex].dataset.quantity || 0;
+        const price = parseFloat(document.getElementById('price').value) || 0;
+        document.getElementById('total-price-display').textContent = (quantity * price).toLocaleString();
+    }
+
+    function removeRow(button) {
+        const row = button.closest('tr');
+        row.remove();
+    }
 </script>
+
 @endsection
