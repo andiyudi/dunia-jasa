@@ -118,20 +118,6 @@
                 {{-- <form action="{{ route('tender.uploadDocument', $tender->id) }}" method="POST" enctype="multipart/form-data"> --}}
                 <form action="#" method="POST" enctype="multipart/form-data">
                     @csrf
-                    <div class="mb-3">
-                        <label for="document_type" class="form-label">Document Type</label>
-                        <select class="form-select" name="type_id" id="document_type" required>
-                            <option value="">Select Document Type</option>
-                            {{-- @foreach($types as $type)
-                                <option value="{{ $type->id }}">{{ $type->name }}</option>
-                            @endforeach --}}
-                        </select>
-                    </div>
-
-                    {{-- <div class="mb-3">
-                        <label for="document_name" class="form-label">Document Name</label>
-                        <input type="text" class="form-control" id="document_name" name="name" required>
-                    </div> --}}
 
                     <div class="mb-3">
                         <label for="file" class="form-label">File</label>
@@ -151,12 +137,12 @@
 </div>
 
 <!-- Partner Selection Modal -->
-<div class="modal fade" id="partnerSelectionModal" tabindex="-1" aria-labelledby="partnerSelectionModalLabel" aria-hidden="true">
+<div class="modal fade show d-block" id="partnerSelectionModal" tabindex="-1" aria-labelledby="partnerSelectionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="partnerSelectionModalLabel">Select Partner</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" onclick="hideModal()" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="partnerSelectionForm">
@@ -171,8 +157,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="selectPartnerButton">Select</button>
+                <button type="button" class="btn btn-secondary" onclick="hideModal()">Close</button>
+                <button type="button" class="btn btn-primary" id="selectPartnerButton" onclick="selectPartner()">Select</button>
             </div>
         </div>
     </div>
@@ -219,33 +205,37 @@
 </div>
 
 <script>
+        // Display the modal on page load
     document.addEventListener('DOMContentLoaded', function() {
-        var partnerSelectionModal = new bootstrap.Modal(document.getElementById('partnerSelectionModal'));
-        partnerSelectionModal.show();
-
-        // Handle partner selection
-        document.getElementById('selectPartnerButton').addEventListener('click', function() {
-            var selectedPartner = document.querySelector('input[name="selected_partner"]:checked');
-            if (selectedPartner) {
-                document.getElementById('selected-partner-id').value = selectedPartner.value;
-                document.getElementById('selected-partner-name').textContent = selectedPartner.nextElementSibling.textContent; // Update partner name display
-                partnerSelectionModal.hide();
-
-                // Enable all "Submit Quotation" buttons
-                document.querySelectorAll('.submit-quotation-btn').forEach(function(button) {
-                    button.disabled = false;
-                });
-            } else {
-                // Show SweetAlert warning if no partner is selected
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'No Partner Selected',
-                    text: 'Please select a partner before proceeding.',
-                    confirmButtonText: 'OK'
-                });
-            }
-        });
+        // Enable Submit Quotation buttons only after partner selection
+        document.getElementById('selectPartnerButton').addEventListener('click', selectPartner);
     });
+
+    function selectPartner() {
+        var selectedPartner = document.querySelector('input[name="selected_partner"]:checked');
+        if (selectedPartner) {
+            document.getElementById('selected-partner-id').value = selectedPartner.value;
+            document.getElementById('selected-partner-name').textContent = selectedPartner.nextElementSibling.textContent;
+
+            // Enable Submit Quotation buttons
+            document.querySelectorAll('.submit-quotation-btn').forEach(function(button) {
+                button.disabled = false;
+            });
+
+            hideModal();
+        } else {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No Partner Selected',
+                text: 'Please select a partner before proceeding.',
+                confirmButtonText: 'OK'
+            });
+        }
+    }
+
+    function hideModal() {
+        document.getElementById('partnerSelectionModal').classList.remove('show', 'd-block');
+    }
 
     var quotationModal = document.getElementById('quotationModal');
     quotationModal.addEventListener('show.bs.modal', function (event) {
