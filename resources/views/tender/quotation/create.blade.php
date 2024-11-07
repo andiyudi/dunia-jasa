@@ -171,9 +171,29 @@
                         <select class="form-select" id="item_id" name="item_id" required>
                             <option value="" selected>Select an item</option>
                             @foreach($tender->items as $item)
-                                <option value="{{ $item->id }}" data-quantity="{{ $item->quantity }}">{{ $item->description }}</option>
+                                <option
+                                    value="{{ $item->id }}"
+                                    data-quantity="{{ $item->quantity }}"
+                                    data-unit="{{ $item->unit }}"
+                                    data-delivery="{{ $item->delivery }}"
+                                    data-specification="{{ $item->specification }}"
+                                >
+                                    {{ $item->description }}
+                                </option>
                             @endforeach
                         </select>
+                    </div>
+                    <div id="itemDetails" class="mb-3" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Specification :</strong> <span id="item-specification"></span></p>
+                                <p><strong>Delivery :</strong> <span id="item-delivery"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Quantity :</strong> <span id="item-quantity"></span></p>
+                                <p><strong>Unit :</strong> <span id="item-unit"></span></p>
+                            </div>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="price" class="form-label">Price</label>
@@ -205,7 +225,10 @@
     document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('selectPartnerButton').addEventListener('click', selectPartner);
         document.getElementById('price').addEventListener('input', calculateTotalPrice);
-        document.getElementById('item_id').addEventListener('change', calculateTotalPrice);
+        document.getElementById('item_id').addEventListener('change', function() {
+            showItemDetails();
+            calculateTotalPrice();
+        });
     });
 
     function selectPartner() {
@@ -274,6 +297,45 @@
         document.getElementById('total-price-display').textContent = (quantity * price).toLocaleString();
     }
 
+    function showItemDetails() {
+        const itemSelect = document.getElementById('item_id');
+        const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+
+        if(selectedOption.value) {
+            document.getElementById('item-quantity').textContent = selectedOption.getAttribute('data-quantity') || 'N/A';
+            document.getElementById('item-unit').textContent = selectedOption.getAttribute('data-unit') || 'N/A';
+            document.getElementById('item-delivery').textContent = selectedOption.getAttribute('data-delivery') || 'N/A';
+            document.getElementById('item-specification').textContent = selectedOption.getAttribute('data-specification') || 'N/A';
+            document.getElementById('itemDetails').style.display = 'block';
+        } else {
+            document.getElementById('itemDetails').style.display = 'none';
+        }
+    }
+    function resetQuotationForm() {
+        // Reset seluruh form
+        document.getElementById('quotationForm').reset();
+
+        // Reset elemen p yang menampilkan detail item
+        document.getElementById('item-specification').textContent = '';
+        document.getElementById('item-delivery').textContent = '';
+        document.getElementById('item-quantity').textContent = '';
+        document.getElementById('item-unit').textContent = '';
+        document.getElementById('total-price-display').textContent = '0';
+
+        // Sembunyikan itemDetails jika ditampilkan sebelumnya
+        document.getElementById('itemDetails').style.display = 'none';
+
+        // Tutup modal
+        $('#submitQuotationModal').modal('hide');
+    }
+
+    document.getElementById('quotationForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        // Reset form dan elemen p setelah item ditambahkan
+        resetQuotationForm();
+    });
+    
     function removeRow(button) {
         const row = button.closest('tr');
         row.remove();
