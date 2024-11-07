@@ -36,19 +36,53 @@
                 </div>
             </div>
         </div>
+        <!-- Tender Documents -->
+        <div class="col-md-12 mb-4">
+            <h5 class="bg-info text-white p-2">Tender Documents</h5>
+            <div class="p-3 border">
+                @if($tender->documents->isEmpty())
+                    <p>No documents available.</p>
+                @else
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Document Type</th>
+                                    <th>Document Name</th>
+                                    <th>Note</th>
+                                    <th>Download Link</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($tender->documents as $document)
+                                    <tr>
+                                        <td>{{ $document->type->name }}</td> <!-- Display document type name -->
+                                        <td>{{ $document->name }}</td> <!-- Document name -->
+                                        <td>{{ $document->note ?? 'No notes available' }}</td> <!-- Document note -->
+                                        <td>
+                                            <a href="{{ $document->path }}" target="_blank">Download</a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+        </div>
 
         <!-- Tender Items Section with Submit Button -->
-        <div class="col-md-12">
+        <div class="col-md-12 mb-4">
             <h5 class="bg-secondary text-white p-2">Tender Items</h5>
         </div>
-        <div class="col-md-12 mb-3">
+        <div class="col-md-12 mb-4">
             <button type="button" class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#submitQuotationModal" disabled id="submitQuotationItemButton">
                 Submit Quotation Item
             </button>
         </div>
 
         <!-- Tender Items Table -->
-        <div class="col-md-12">
+        <div class="col-md-12 mb-4">
             <div class="table-responsive">
                 <table class="table table-bordered" id="tenderItemsTable">
                     <thead class="table-light">
