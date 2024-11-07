@@ -87,12 +87,23 @@
                 <table class="table table-bordered" id="tenderItemsTable">
                     <thead class="table-light">
                         <tr>
-                            <th>Tender Items</th>
+                            <th colspan="5" style="text-align: center;">Tender Item Detail</th>
+                            <th colspan="4" style="text-align: center;">Quotation Item Details</th>
+                            <th rowspan="2">Action</th> <!-- Action akan berada di sebelah kanan tanpa subheader -->
+                        </tr>
+                        <tr>
+                            <!-- Tender Details -->
+                            <th>Description</th>
+                            <th>Specification</th>
+                            <th>Delivery</th>
+                            <th>Quantity</th>
+                            <th>Unit</th>
+
+                            <!-- Quotation Details -->
                             <th>Price</th>
                             <th>Delivery Time</th>
                             <th>Remark</th>
                             <th>Total Price</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -119,7 +130,10 @@
                         <textarea class="form-control" id="note" name="note" rows="3"></textarea>
                     </div>
 
-                    <button type="submit" class="btn btn-success">Upload Document</button>
+                    <!-- Tambahkan d-flex dan justify-content-end pada wrapper tombol -->
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-success">Upload Document</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -213,7 +227,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetQuotationForm()">Reset</button>
                     <button type="submit" class="btn btn-primary">Add Item</button>
                 </div>
             </form>
@@ -264,11 +278,20 @@
         const selectedItemText = itemSelect.options[itemSelect.selectedIndex].text;
         const selectedItemValue = itemSelect.value;
 
+        const itemSpecification = document.getElementById('item-specification').textContent;
+        const itemDelivery = document.getElementById('item-delivery').textContent;
+        const itemQuantity = document.getElementById('item-quantity').textContent;
+        const itemUnit = document.getElementById('item-unit').textContent;
+
         const tbody = document.querySelector('#tenderItemsTable tbody');
 
         const newRow = document.createElement('tr');
         newRow.innerHTML = `
             <td>${selectedItemText}</td>
+            <td>${itemSpecification}</td>
+            <td>${itemDelivery}</td>
+            <td>${itemQuantity}</td>
+            <td>${itemUnit}</td>
             <td>${priceInput}</td>
             <td>${deliveryTimeInput}</td>
             <td>${remarkInput}</td>
@@ -325,8 +348,6 @@
         // Sembunyikan itemDetails jika ditampilkan sebelumnya
         document.getElementById('itemDetails').style.display = 'none';
 
-        // Tutup modal
-        $('#submitQuotationModal').modal('hide');
     }
 
     document.getElementById('quotationForm').addEventListener('submit', function(event) {
@@ -335,7 +356,7 @@
         // Reset form dan elemen p setelah item ditambahkan
         resetQuotationForm();
     });
-    
+
     function removeRow(button) {
         const row = button.closest('tr');
         row.remove();
