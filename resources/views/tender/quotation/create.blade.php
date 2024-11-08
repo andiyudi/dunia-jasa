@@ -117,7 +117,7 @@
         <div class="col-md-12 mt-4">
             <h5 class="bg-warning text-white p-2">Upload Quotation Document</h5>
             <div class="p-3 border">
-                <form action="#" method="POST" enctype="multipart/form-data" id="uploadQuotationForm">
+                <form action="{{ route('quotation.store') }}" method="POST" enctype="multipart/form-data" id="uploadQuotationForm">
                     @csrf
                     <div id="tenderItemsInputs"></div>
                     <div class="mb-3">
@@ -236,131 +236,182 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('selectPartnerButton').addEventListener('click', selectPartner);
-        document.getElementById('price').addEventListener('input', calculateTotalPrice);
-        document.getElementById('item_id').addEventListener('change', function() {
-            showItemDetails();
-            calculateTotalPrice();
+    let quotationData = {};
+let selectedPartnerId = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('selectPartnerButton').addEventListener('click', selectPartner);
+    document.getElementById('price').addEventListener('input', calculateTotalPrice);
+    document.getElementById('item_id').addEventListener('change', function() {
+        showItemDetails();
+        calculateTotalPrice();
+    });
+
+    document.getElementById('uploadQuotationForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const partnerIdInput = document.createElement('input');
+        partnerIdInput.type = 'hidden';
+        partnerIdInput.name = 'partner_id';
+        partnerIdInput.value = selectedPartnerId;
+        this.appendChild(partnerIdInput);
+
+        for (const [itemId, data] of Object.entries(quotationData)) {
+            const priceInput = document.createElement('input');
+            priceInput.type = 'hidden';
+            priceInput.name = `items[${itemId}][price]`;
+            priceInput.value = data.price;
+            this.appendChild(priceInput);
+
+            const deliveryTimeInput = document.createElement('input');
+            deliveryTimeInput.type = 'hidden';
+            deliveryTimeInput.name = `items[${itemId}][delivery_time]`;
+            deliveryTimeInput.value = data.delivery_time;
+            this.appendChild(deliveryTimeInput);
+
+            const remarkInput = document.createElement('input');
+            remarkInput.type = 'hidden';
+            remarkInput.name = `items[${itemId}][remark]`;
+            remarkInput.value = data.remark;
+            this.appendChild(remarkInput);
+
+            const totalPriceInput = document.createElement('input');
+            totalPriceInput.type = 'hidden';
+            totalPriceInput.name = `items[${itemId}][total_price]`;
+            totalPriceInput.value = data.total_price;
+            this.appendChild(totalPriceInput);
+        }
+
+        this.submit();
+    });
+});
+
+function selectPartner() {
+    var selectedPartner = document.querySelector('input[name="selected_partner"]:checked');
+    if (selectedPartner) {
+        selectedPartnerId = selectedPartner.value;
+        document.getElementById('selected-partner-name').textContent = selectedPartner.nextElementSibling.textContent;
+        document.getElementById('submitQuotationItemButton').disabled = false;
+        hideModal();
+    } else {
+        Swal.fire({
+            icon: 'warning',
+            title: 'No Partner Selected',
+            text: 'Please select a partner before proceeding.',
+            confirmButtonText: 'OK'
         });
-    });
-
-    function selectPartner() {
-        var selectedPartner = document.querySelector('input[name="selected_partner"]:checked');
-        if (selectedPartner) {
-            document.getElementById('selected-partner-id').value = selectedPartner.value;
-            document.getElementById('selected-partner-name').textContent = selectedPartner.nextElementSibling.textContent;
-            document.getElementById('submitQuotationItemButton').disabled = false;
-            hideModal();
-        } else {
-            Swal.fire({
-                icon: 'warning',
-                title: 'No Partner Selected',
-                text: 'Please select a partner before proceeding.',
-                confirmButtonText: 'OK'
-            });
-        }
     }
+}
 
-    function hideModal() {
-        document.getElementById('partnerSelectionModal').classList.remove('show', 'd-block');
-    }
+function hideModal() {
+    document.getElementById('partnerSelectionModal').classList.remove('show', 'd-block');
+}
 
-    function addItemToTable(event) {
-        event.preventDefault();
+function addItemToTable(event) {
+    event.preventDefault();
 
-        const itemSelect = document.getElementById('item_id');
-        const priceInput = document.getElementById('price').value;
-        const deliveryTimeInput = document.getElementById('delivery_time').value;
-        const remarkInput = document.getElementById('remark').value;
-        const totalPriceDisplay = document.getElementById('total-price-display').textContent;
+    const itemSelect = document.getElementById('item_id');
+    const priceInput = document.getElementById('price').value;
+    const deliveryTimeInput = document.getElementById('delivery_time').value;
+    const remarkInput = document.getElementById('remark').value;
+    const totalPriceDisplay = document.getElementById('total-price-display').textContent;
 
-        const selectedItemText = itemSelect.options[itemSelect.selectedIndex].text;
-        const selectedItemValue = itemSelect.value;
+    const selectedItemText = itemSelect.options[itemSelect.selectedIndex].text;
+    const selectedItemValue = itemSelect.value;
 
-        const itemSpecification = document.getElementById('item-specification').textContent;
-        const itemDelivery = document.getElementById('item-delivery').textContent;
-        const itemQuantity = document.getElementById('item-quantity').textContent;
-        const itemUnit = document.getElementById('item-unit').textContent;
+    const itemSpecification = document.getElementById('item-specification').textContent;
+    const itemDelivery = document.getElementById('item-delivery').textContent;
+    const itemQuantity = document.getElementById('item-quantity').textContent;
+    const itemUnit = document.getElementById('item-unit').textContent;
 
-        const tbody = document.querySelector('#tenderItemsTable tbody');
+    const tbody = document.querySelector('#tenderItemsTable tbody');
 
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td>${selectedItemText}</td>
-            <td>${itemSpecification}</td>
-            <td>${itemDelivery}</td>
-            <td>${itemQuantity}</td>
-            <td>${itemUnit}</td>
-            <td>${priceInput}</td>
-            <td>${deliveryTimeInput}</td>
-            <td>${remarkInput}</td>
-            <td>${totalPriceDisplay}</td>
-            <td><button type="button" class="btn btn-danger" onclick="removeRow(this)">Delete</button></td>
-        `;
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+        <td>${selectedItemText}</td>
+        <td>${itemSpecification}</td>
+        <td>${itemDelivery}</td>
+        <td>${itemQuantity}</td>
+        <td>${itemUnit}</td>
+        <td>${priceInput}</td>
+        <td>${deliveryTimeInput}</td>
+        <td>${remarkInput}</td>
+        <td>${totalPriceDisplay}</td>
+        <td><button type="button" class="btn btn-danger" onclick="removeRow(this, '${selectedItemValue}')">Delete</button></td>
+    `;
 
-        tbody.appendChild(newRow);
+    tbody.appendChild(newRow);
 
-        const inputsContainer = document.getElementById('tenderItemsInputs');
-        inputsContainer.innerHTML += `
-            <input type="hidden" name="items[${selectedItemValue}][price]" value="${priceInput}">
-            <input type="hidden" name="items[${selectedItemValue}][delivery_time]" value="${deliveryTimeInput}">
-            <input type="hidden" name="items[${selectedItemValue}][remark]" value="${remarkInput}">
-            <input type="hidden" name="items[${selectedItemValue}][total_price]" value="${totalPriceDisplay}">
-        `;
+    // Store quotation data
+    quotationData[selectedItemValue] = {
+        price: priceInput,
+        delivery_time: deliveryTimeInput,
+        remark: remarkInput,
+        total_price: totalPriceDisplay
+    };
 
-        document.getElementById('quotationForm').reset();
-        $('#submitQuotationModal').modal('hide');
-    }
+    // Disable the selected option
+    itemSelect.options[itemSelect.selectedIndex].disabled = true;
 
-    function calculateTotalPrice() {
-        const itemSelect = document.getElementById('item_id');
-        const quantity = itemSelect.options[itemSelect.selectedIndex].dataset.quantity || 0;
-        const price = parseFloat(document.getElementById('price').value) || 0;
-        document.getElementById('total-price-display').textContent = (quantity * price).toLocaleString();
-    }
+    // Reset and hide modal
+    document.getElementById('quotationForm').reset();
+    $('#submitQuotationModal').modal('hide');
+}
 
-    function showItemDetails() {
-        const itemSelect = document.getElementById('item_id');
-        const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+function calculateTotalPrice() {
+    const itemSelect = document.getElementById('item_id');
+    const quantity = itemSelect.options[itemSelect.selectedIndex].dataset.quantity || 0;
+    const price = parseFloat(document.getElementById('price').value) || 0;
+    document.getElementById('total-price-display').textContent = (quantity * price).toLocaleString();
+}
 
-        if(selectedOption.value) {
-            document.getElementById('item-quantity').textContent = selectedOption.getAttribute('data-quantity') || 'N/A';
-            document.getElementById('item-unit').textContent = selectedOption.getAttribute('data-unit') || 'N/A';
-            document.getElementById('item-delivery').textContent = selectedOption.getAttribute('data-delivery') || 'N/A';
-            document.getElementById('item-specification').textContent = selectedOption.getAttribute('data-specification') || 'N/A';
-            document.getElementById('itemDetails').style.display = 'block';
-        } else {
-            document.getElementById('itemDetails').style.display = 'none';
-        }
-    }
-    function resetQuotationForm() {
-        // Reset seluruh form
-        document.getElementById('quotationForm').reset();
+function showItemDetails() {
+    const itemSelect = document.getElementById('item_id');
+    const selectedOption = itemSelect.options[itemSelect.selectedIndex];
 
-        // Reset elemen p yang menampilkan detail item
-        document.getElementById('item-specification').textContent = '';
-        document.getElementById('item-delivery').textContent = '';
-        document.getElementById('item-quantity').textContent = '';
-        document.getElementById('item-unit').textContent = '';
-        document.getElementById('total-price-display').textContent = '0';
-
-        // Sembunyikan itemDetails jika ditampilkan sebelumnya
+    if(selectedOption.value) {
+        document.getElementById('item-quantity').textContent = selectedOption.getAttribute('data-quantity') || 'N/A';
+        document.getElementById('item-unit').textContent = selectedOption.getAttribute('data-unit') || 'N/A';
+        document.getElementById('item-delivery').textContent = selectedOption.getAttribute('data-delivery') || 'N/A';
+        document.getElementById('item-specification').textContent = selectedOption.getAttribute('data-specification') || 'N/A';
+        document.getElementById('itemDetails').style.display = 'block';
+    } else {
         document.getElementById('itemDetails').style.display = 'none';
+    }
+}
 
+function resetQuotationForm() {
+    document.getElementById('quotationForm').reset();
+
+    document.getElementById('item-specification').textContent = '';
+    document.getElementById('item-delivery').textContent = '';
+    document.getElementById('item-quantity').textContent = '';
+    document.getElementById('item-unit').textContent = '';
+    document.getElementById('total-price-display').textContent = '0';
+
+    document.getElementById('itemDetails').style.display = 'none';
+}
+
+document.getElementById('quotationForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    resetQuotationForm();
+});
+
+function removeRow(button, itemId) {
+    const row = button.closest('tr');
+    row.remove();
+
+    // Re-enable the removed item in the dropdown
+    const itemSelect = document.getElementById('item_id');
+    const optionToEnable = Array.from(itemSelect.options).find(option => option.value === itemId);
+    if (optionToEnable) {
+        optionToEnable.disabled = false;
     }
 
-    document.getElementById('quotationForm').addEventListener('submit', function(event) {
-        event.preventDefault();
+    // Remove the item from quotation data
+    delete quotationData[itemId];
+}
 
-        // Reset form dan elemen p setelah item ditambahkan
-        resetQuotationForm();
-    });
-
-    function removeRow(button) {
-        const row = button.closest('tr');
-        row.remove();
-    }
 </script>
 
 @endsection

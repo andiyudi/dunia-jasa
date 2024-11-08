@@ -95,6 +95,7 @@ class QuotationController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request->all());
         // Validate the form inputs
         $validatedData = $request->validate([
             'partner_id' => 'required|exists:partners,id',
