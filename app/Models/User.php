@@ -51,6 +51,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function partners()
     {
-        return $this->belongsToMany(Partner::class)->withTimestamps();
+        return $this->belongsToMany(Partner::class, 'partner_user')
+                ->withPivot('id') // Mengambil ID dari tabel pivot
+                ->withTimestamps();
     }
 }

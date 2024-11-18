@@ -95,33 +95,45 @@ class QuotationController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
-        // Validate the form inputs
+        // Validasi data untuk items
         $validatedData = $request->validate([
             'partner_id' => 'required|exists:partners,id',
-            'item_id' => 'required|exists:tender_items,id',
-            'price' => 'required|numeric|min:0',
-            'delivery_time' => 'required|string',
-            'remark' => 'nullable|string',
+            'items' => 'required|array',
+            'items.*.price' => 'required|numeric|min:0',
+            'items.*.delivery_time' => 'required|string',
+            'items.*.remark' => 'nullable|string',
         ]);
 
-        // Find the tender item to get the quantity
-        $tenderItem = TenderItem::findOrFail($validatedData['item_id']);
+        // Cari partner_user_id berdasarkan partner_id dan user yang sedang masuk
+        $partnerUser = auth()->user()->partners()->where('partners.id', $validatedData['partner_id'])->first();
 
-        // Calculate total price
-        $totalPrice = $validatedData['price'] * $tenderItem->quantity;
+        if (!$partnerUser) {
+            return redirect()->back()->withErrors(['partner_id' => 'Invalid partner-user association.']);
+        }
 
-        // Create the quotation
-        $quotation = Quotation::create([
-            'tender_item_id' => $validatedData['item_id'],
-            'partner_user_id' => $validatedData['partner_id'],
-            'price' => $validatedData['price'],
-            'total_price' => $totalPrice,
-            'delivery_time' => $validatedData['delivery_time'],
-            'remark' => $validatedData['remark'],
-        ]);
+        $partnerUserId = $partnerUser->pivot->id; // Ambil ID dari tabel pivot
 
-        return redirect()->back()->with('success', 'Quotation submitted successfully.');
+        // Iterasi melalui setiap item dalam array
+        foreach ($validatedData['items'] as $itemId => $item) {
+            // Pastikan item_id ada dalam tender_items
+            $tenderItem = TenderItem::findOrFail($itemId);
+
+            // Hitung total harga untuk item
+            $totalPrice = $item['price'] * $tenderItem->quantity;
+
+            // Simpan quotation ke database
+            Quotation::create([
+                'tender_item_id' => $itemId,
+                'partner_user_id' => $partnerUserId,
+                'price' => $item['price'],
+                'total_price' => $totalPrice,
+                'delivery_time' => $item['delivery_time'],
+                'remark' => $item['remark'] ?? null,
+            ]);
+        }
+
+        // Redirect kembali dengan pesan sukses
+        return to_route('quotation.index')->with('success', 'Quotations submitted successfully.');
     }
 
     /**
