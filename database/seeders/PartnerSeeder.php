@@ -21,7 +21,7 @@ class PartnerSeeder extends Seeder
         $users = User::all();
 
         // Membuat 10 partner dengan data acak menggunakan Faker
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 8; $i++) {
             $partner = Partner::create([
                 'name' => $faker->company,
                 'npwp' => $faker->regexify('[0-9]{15}'), // Nomor NPWP 15 digit acak
@@ -45,7 +45,7 @@ class PartnerSeeder extends Seeder
             }
 
             // Assign minimal 1 user ke setiap partner, excluding admin users
-            $assignedUsers = $users->where('is_admin', false)->random(rand(1, 2));
+            $assignedUsers = $users->where('is_admin', false)->random(rand(1, 3));
             $partner->users()->attach($assignedUsers);
         }
     }

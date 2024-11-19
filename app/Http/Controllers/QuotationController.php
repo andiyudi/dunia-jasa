@@ -137,9 +137,20 @@ class QuotationController extends Controller
                 throw new \Exception('Invalid partner-user association.');
             }
 
-            $partnerUserId = $partnerUser->pivot->id; // Ambil ID dari tabel pivot
+             $partnerUserId = $partnerUser->pivot->id; // Ambil ID dari tabel pivot
 
-            // Iterasi melalui setiap item dalam array
+             // Pengecekan apakah ada user_id lain yang sudah submit quotation dengan partner_id yang sama
+            $existingQuotations = Quotation::whereIn('tender_item_id', array_keys($validatedData['items']))
+                ->whereHas('partnerUser.partner', function ($query) use ($validatedData) {
+                    $query->where('id', $validatedData['partner_id']);
+                })->exists();
+
+
+            if ($existingQuotations) {
+                throw new \Exception('Another user from this partner has already submitted a quotation.');
+            }
+
+             // Iterasi melalui setiap item dalam array
             foreach ($validatedData['items'] as $itemId => $item) {
                 // Pastikan item_id ada dalam tender_items
                 $tenderItem = TenderItem::findOrFail($itemId);
@@ -158,22 +169,23 @@ class QuotationController extends Controller
                 ]);
             }
 
-            // Commit transaksi jika semua berhasil
+             // Commit transaksi jika semua berhasil
             DB::commit();
 
-            // Redirect kembali dengan pesan sukses
+             // Redirect kembali dengan pesan sukses
             return to_route('quotation.index')->with('success', 'Quotations submitted successfully.');
-        } catch (\Exception $e) {
-            // Rollback transaksi jika terjadi kesalahan
+            } catch (\Exception $e) {
+             // Rollback transaksi jika terjadi kesalahan
             DB::rollBack();
 
-            // Log error jika diperlukan
+             // Log error jika diperlukan
             \Log::error('Error creating quotations: ' . $e->getMessage());
 
-            // Redirect kembali dengan pesan error
-            return redirect()->back()->withErrors(['error' => 'Failed to submit quotations. Please try again.']);
+             // Redirect kembali dengan pesan error
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
     }
+
 
     /**
      * Display the specified resource.

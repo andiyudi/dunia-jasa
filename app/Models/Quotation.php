@@ -22,4 +22,9 @@ class Quotation extends Model
     {
         return $this->belongsTo(TenderItem::class, 'tender_item_id');
     }
+
+    public function partnerUser()
+    {
+        return $this->belongsTo(PartnerUser::class, 'partner_user_id');
+    }
 }
