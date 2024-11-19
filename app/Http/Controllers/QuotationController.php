@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Tender;
 use App\Models\Quotation;
-use Illuminate\Http\Request;
-use Yajra\DataTables\Facades\DataTables;
 use App\Models\TenderItem;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 
 class QuotationController extends Controller
 {
@@ -20,12 +21,29 @@ class QuotationController extends Controller
             $currentUserId = auth()->id();
 
             // Eager load necessary relationships and join with the partner_user table to get the user_id of the creator
-            $data = Tender::with(['partner', 'category', 'documents.type'])
+            $data = Tender::with(['partner', 'category', 'documents.type', 'items.quotations']) // Eager load 'quotations' for items
                 ->select('tenders.*', 'partner_user.user_id as creator_id')
                 ->leftJoin('partner_user', 'tenders.partner_user_id', '=', 'partner_user.id')
                 ->where('partner_user.user_id', '!=', $currentUserId) // Exclude tenders created by the current user
                 ->latest()
                 ->get();
+
+            foreach ($data as $tender) {
+                $tender->is_submitted = false; // Default: belum ada quotation
+
+                foreach ($tender->items as $item) {
+                    // Ambil semua partner_user_id untuk user login dari tabel pivot
+                    $partnerUserIds = auth()->user()->partners->pluck('pivot.id')->toArray();
+
+                    // Cek apakah ada quotation dengan partner_user_id milik user login
+                    $quotation = $item->quotations()->whereIn('partner_user_id', $partnerUserIds)->first();
+
+                    if ($quotation) {
+                        $tender->is_submitted = true;
+                        break; // Jika ditemukan, keluar dari loop
+                    }
+                }
+            }
 
             return DataTables::of($data)
                 ->addIndexColumn()
@@ -49,15 +67,18 @@ class QuotationController extends Controller
                 })
                 ->addColumn('action', function($data){
                     $route = 'quotation';
-                    return view('tender.quotation.action', compact('route', 'data'));
+                    $disabled = $data->is_submitted ? 'disabled' : ''; // Disable button if already submitted
+                    return view('tender.quotation.action', compact('route', 'data', 'disabled'));
                 })
+                // ->addColumn('is_submitted', function ($data) {
+                //     return $data->is_submitted ? 'Yes' : 'No';
+                // })
                 ->rawColumns(['status', 'action', 'document'])
                 ->make(true);
         }
 
         return view('tender.quotation.index');
     }
-
 
     /**
      * Show the form for creating a new resource.
@@ -93,6 +114,7 @@ class QuotationController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+
     public function store(Request $request)
     {
         // Validasi data untuk items
@@ -104,36 +126,53 @@ class QuotationController extends Controller
             'items.*.remark' => 'nullable|string',
         ]);
 
-        // Cari partner_user_id berdasarkan partner_id dan user yang sedang masuk
-        $partnerUser = auth()->user()->partners()->where('partners.id', $validatedData['partner_id'])->first();
+        try {
+            // Mulai transaksi database
+            DB::beginTransaction();
 
-        if (!$partnerUser) {
-            return redirect()->back()->withErrors(['partner_id' => 'Invalid partner-user association.']);
+            // Cari partner_user_id berdasarkan partner_id dan user yang sedang masuk
+            $partnerUser = auth()->user()->partners()->where('partners.id', $validatedData['partner_id'])->first();
+
+            if (!$partnerUser) {
+                throw new \Exception('Invalid partner-user association.');
+            }
+
+            $partnerUserId = $partnerUser->pivot->id; // Ambil ID dari tabel pivot
+
+            // Iterasi melalui setiap item dalam array
+            foreach ($validatedData['items'] as $itemId => $item) {
+                // Pastikan item_id ada dalam tender_items
+                $tenderItem = TenderItem::findOrFail($itemId);
+
+                // Hitung total harga untuk item
+                $totalPrice = $item['price'] * $tenderItem->quantity;
+
+                // Simpan quotation ke database
+                Quotation::create([
+                    'tender_item_id' => $itemId,
+                    'partner_user_id' => $partnerUserId,
+                    'price' => $item['price'],
+                    'total_price' => $totalPrice,
+                    'delivery_time' => $item['delivery_time'],
+                    'remark' => $item['remark'] ?? null,
+                ]);
+            }
+
+            // Commit transaksi jika semua berhasil
+            DB::commit();
+
+            // Redirect kembali dengan pesan sukses
+            return to_route('quotation.index')->with('success', 'Quotations submitted successfully.');
+        } catch (\Exception $e) {
+            // Rollback transaksi jika terjadi kesalahan
+            DB::rollBack();
+
+            // Log error jika diperlukan
+            \Log::error('Error creating quotations: ' . $e->getMessage());
+
+            // Redirect kembali dengan pesan error
+            return redirect()->back()->withErrors(['error' => 'Failed to submit quotations. Please try again.']);
         }
-
-        $partnerUserId = $partnerUser->pivot->id; // Ambil ID dari tabel pivot
-
-        // Iterasi melalui setiap item dalam array
-        foreach ($validatedData['items'] as $itemId => $item) {
-            // Pastikan item_id ada dalam tender_items
-            $tenderItem = TenderItem::findOrFail($itemId);
-
-            // Hitung total harga untuk item
-            $totalPrice = $item['price'] * $tenderItem->quantity;
-
-            // Simpan quotation ke database
-            Quotation::create([
-                'tender_item_id' => $itemId,
-                'partner_user_id' => $partnerUserId,
-                'price' => $item['price'],
-                'total_price' => $totalPrice,
-                'delivery_time' => $item['delivery_time'],
-                'remark' => $item['remark'] ?? null,
-            ]);
-        }
-
-        // Redirect kembali dengan pesan sukses
-        return to_route('quotation.index')->with('success', 'Quotations submitted successfully.');
     }
 
     /**
