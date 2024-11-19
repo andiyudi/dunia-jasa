@@ -127,8 +127,8 @@ class TenderController extends Controller
                 'items.unit.*' => 'required|string|max:255',
                 'items.delivery.*' => 'required|string|max:255',
                 //validasi file
-                'types.*' => 'required|file|mimes:pdf|max:2048', // Adjust mime types and size as needed
-                'notes.*' => 'required|string|max:255', // Adjust max length as needed
+                'types.*' => 'nullable|file|mimes:pdf|max:2048', // Adjust mime types and size as needed
+                'notes.*' => 'nullable|string|max:255', // Adjust max length as needed
             ]);
 
             // Ambil user yang sedang login
@@ -177,12 +177,15 @@ class TenderController extends Controller
             }
 
             // Simpan file ke dalam tabel tender_documents
-            foreach ($request->types as $typeId => $file) {
-                if ($file->isValid()) {
-                    // Panggil metode upload untuk menyimpan file ke Google Drive
-                    $this->upload($tender->id, $file, $typeId, $request->notes[$typeId] ?? null);
+            if ($request->types) { // Pastikan hanya menjalankan jika ada file yang diunggah
+                foreach ($request->types as $typeId => $file) {
+                    if ($file && $file->isValid()) { // Pastikan file valid sebelum memproses
+                        // Panggil metode upload untuk menyimpan file ke Google Drive
+                        $this->upload($tender->id, $file, $typeId, $request->notes[$typeId] ?? null);
+                    }
                 }
             }
+
             // Jika semua proses berhasil, lakukan commit pada transaksi
             DB::commit();
 
