@@ -31,6 +31,7 @@ $pretitle = 'Data';
             <table class="table table-bordered table-striped table-hover display responsive no wrap" id="vendor-table" width="100%">
                 <thead>
                     <tr>
+                        <th style="text-align:center">Action</th>
                         <th style="text-align:center">No</th>
                         <th style="text-align:center">Name</th>
                         <th style="text-align:center">Category</th>
@@ -41,7 +42,6 @@ $pretitle = 'Data';
                         <th style="text-align:center">Email</th>
                         <th style="text-align:center">Contact</th>
                         <th style="text-align:center">Verified</th>
-                        <th style="text-align:center">Action</th>
                     </tr>
                 </thead>
             </table>
@@ -79,6 +79,7 @@ $pretitle = 'Data';
                     }
                 },
                 columns: [
+                    { data: 'action', name: 'action', orderable: false, searchable: false },
                     { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                     { data: 'name', name: 'name' },
                     { data: 'categories', name: 'categories', orderable: false, searchable: false },
@@ -89,7 +90,6 @@ $pretitle = 'Data';
                     { data: 'email', name: 'email', orderable: false, searchable: false },
                     { data: 'contact', name: 'contact', orderable: false, searchable: false },
                     { data: 'is_verified', name: 'is_verified', orderable: false, searchable: false },
-                    { data: 'action', name: 'action', orderable: false, searchable: false }
                 ]
             });
 
