@@ -122,7 +122,7 @@
                     <div id="tenderItemsInputs"></div>
                     <div class="mb-3">
                         <label for="file" class="form-label">File</label>
-                        <input type="file" class="form-control" id="file" name="file" required>
+                        <input type="file" class="form-control" id="file" name="file">
                     </div>
 
                     <div class="mb-3">
@@ -132,7 +132,7 @@
 
                     <!-- Tambahkan d-flex dan justify-content-end pada wrapper tombol -->
                     <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-success">Upload Document</button>
+                        <button type="submit" class="btn btn-success">Submit</button>
                     </div>
                 </form>
             </div>

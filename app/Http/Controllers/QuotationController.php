@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Type;
 use App\Models\Tender;
+use App\Models\Partner;
 use App\Models\Quotation;
 use App\Models\TenderItem;
 use Illuminate\Http\Request;
+use App\Models\TenderDocument;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
 
 class QuotationController extends Controller
@@ -117,6 +121,7 @@ class QuotationController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->all());
         // Validasi data untuk items
         $validatedData = $request->validate([
             'partner_id' => 'required|exists:partners,id',
@@ -124,6 +129,8 @@ class QuotationController extends Controller
             'items.*.price' => 'required|numeric|min:0',
             'items.*.delivery_time' => 'required|string',
             'items.*.remark' => 'nullable|string',
+            'file' => 'nullable|file|mimes:pdf|max:2048',
+            'note' => 'nullable|string|max:255',
         ]);
 
         try {
@@ -137,7 +144,7 @@ class QuotationController extends Controller
                 throw new \Exception('Invalid partner-user association.');
             }
 
-             $partnerUserId = $partnerUser->pivot->id; // Ambil ID dari tabel pivot
+            $partnerUserId = $partnerUser->pivot->id; // Ambil ID dari tabel pivot
 
              // Pengecekan apakah ada user_id lain yang sudah submit quotation dengan partner_id yang sama
             $existingQuotations = Quotation::whereIn('tender_item_id', array_keys($validatedData['items']))
@@ -169,6 +176,33 @@ class QuotationController extends Controller
                 ]);
             }
 
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+
+                // Cari atau buat folder di Google Drive
+                $partner = Partner::findOrFail($validatedData['partner_id']);
+                $folderName = $partner->name . '-' . $partner->id;
+                $folderId = $this->createOrFindGoogleDriveFolder($folderName);
+
+                // Upload file ke Google Drive
+                Storage::disk('google')->putFileAs($folderId, $file, $fileName);
+
+                // Generate URL file di Google Drive
+                $filePath = Storage::disk('google')->url($folderId . '/' . $fileName);
+
+                $typeId = Type::where('category', 'Quotation')->value('id');
+
+                // Simpan informasi file ke database
+                TenderDocument::create([
+                    'tender_id' => $tenderItem->tender_id,
+                    'type_id' => $typeId,
+                    'name' => $fileName,
+                    'path' => $filePath,
+                    'note' => $validatedData['note'],
+                ]);
+            }
+
              // Commit transaksi jika semua berhasil
             DB::commit();
 
@@ -184,6 +218,70 @@ class QuotationController extends Controller
              // Redirect kembali dengan pesan error
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
+    }
+
+        /**
+     * Creates or finds a folder on Google Drive by folder name
+     *
+     * @param string $folderName
+     * @return string Folder ID
+     */
+    private function createOrFindGoogleDriveFolder($folderName)
+    {
+        // Step 1: Find or create the "Quotation" folder
+        $parentFolderName = 'QUOTATION';
+        $parentFolderId = null;
+
+        // Check if the "Quotation" folder exists
+        $folders = Storage::disk('google')->listContents('/', false);
+        foreach ($folders as $folder) {
+            if ($folder->type() === 'dir' && basename($folder->path()) === $parentFolderName) {
+                $parentFolderId = $folder->path();
+                break;
+            }
+        }
+
+        // If "Quotation" folder doesn't exist, create it
+        if (!$parentFolderId) {
+            Storage::disk('google')->makeDirectory($parentFolderName);
+            // List contents again to get the newly created "Quotation" folder ID
+            $folders = Storage::disk('google')->listContents('/', false);
+            foreach ($folders as $folder) {
+                if ($folder->type() === 'dir' && basename($folder->path()) === $parentFolderName) {
+                    $parentFolderId = $folder->path();
+                    break;
+                }
+            }
+        }
+
+        if (!$parentFolderId) {
+            throw new \Exception('Failed to create or find "Quotation" folder.');
+        }
+
+        // Step 2: Find or create the partner-specific folder within the "Quotation" folder
+        $partnerFolderId = null;
+        $partnerFolders = Storage::disk('google')->listContents($parentFolderId, false);
+
+        foreach ($partnerFolders as $folder) {
+            if ($folder->type() === 'dir' && basename($folder->path()) === $folderName) {
+                $partnerFolderId = $folder->path();
+                break;
+            }
+        }
+
+        // If the partner folder doesn't exist, create it inside the "Quotation" folder
+        if (!$partnerFolderId) {
+            Storage::disk('google')->makeDirectory($parentFolderId . '/' . $folderName);
+            // List contents again to get the newly created partner folder ID
+            $partnerFolders = Storage::disk('google')->listContents($parentFolderId, false);
+            foreach ($partnerFolders as $folder) {
+                if ($folder->type() === 'dir' && basename($folder->path()) === $folderName) {
+                    return $folder->path();
+                }
+            }
+        }
+
+        return $partnerFolderId;
     }
 
 

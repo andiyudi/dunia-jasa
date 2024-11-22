@@ -19,6 +19,7 @@ class TypeSeeder extends Seeder
             ['name' => 'Legalitas 3', 'category' => 'Legal'],
             ['name' => 'KAK', 'category' => 'Tender'],
             ['name' => 'BOQ', 'category' => 'Tender'],
+            ['name' => 'Offer', 'category' => 'Quotation'],
         ];
 
         foreach ($types as $type) {
