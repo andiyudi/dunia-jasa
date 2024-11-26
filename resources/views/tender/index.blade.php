@@ -27,6 +27,7 @@ $pretitle = 'Data';
         <table class="table table-bordered table-striped table-hover display responsive no-wrap" id="tender-table" width="100%">
             <thead>
                 <tr>
+                    <th>Action</th>
                     <th>No</th>
                     <th>Company</th>
                     <th>Category</th>
@@ -35,7 +36,6 @@ $pretitle = 'Data';
                     <th>Estimation</th>
                     <th>Document</th>
                     <th>Status</th>
-                    <th>Action</th>
                 </tr>
             </thead>
         </table>
@@ -68,6 +68,7 @@ $pretitle = 'Data';
             scrollX: true,
             ajax: "{{ route('tender.index') }}",
             columns: [
+                {data: 'action', name: 'action', orderable: false, searchable: false},
                 {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
                 {data: 'partner', name: 'partner'},
                 {data: 'category', name: 'category'},
@@ -76,7 +77,6 @@ $pretitle = 'Data';
                 {data: 'estimation', name: 'estimation'},
                 {data: 'document', name: 'document'},
                 {data: 'status', name: 'status', orderable: false, searchable: false},
-                {data: 'action', name: 'action', orderable: false, searchable: false}
             ]
         });
     });
