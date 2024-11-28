@@ -13,14 +13,16 @@ return new class extends Migration
     {
         Schema::create('quotation_files', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('quotation_id');
+            $table->unsignedBigInteger('tender_id');
+            $table->unsignedBigInteger('partner_id');
             $table->unsignedBigInteger('type_id');
             $table->string('name');
             $table->string('path');
             $table->string('note');
             $table->timestamps();
 
-            $table->foreign('quotation_id')->references('id')->on('quotations')->onDelete('cascade');
+            $table->foreign('tender_id')->references('id')->on('tenders')->onDelete('cascade');
+            $table->foreign('partner_id')->references('id')->on('partners')->onDelete('cascade');
             $table->foreign('type_id')->references('id')->on('types')->onDelete('cascade');
         });
     }

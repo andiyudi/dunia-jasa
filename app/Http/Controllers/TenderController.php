@@ -308,25 +308,16 @@ class TenderController extends Controller
     public function show($encryptTenderId)
     {
         $id = decrypt($encryptTenderId);
-        $categories = Category::all();
-        $tender = Tender::find($id);
-        $types = Type::where('category', 'Tender')->get();
-        $user = Auth::user();
-        // Check if the user is an admin
-        if ($user->is_admin) {
-            // Admins can manage all partners or bypass restrictions
-            $partners = Partner::all(); // Admin can select any partner
-        } else {
-            // Regular user: retrieve only verified partners for the logged-in user
-            $partners = $user->partners()->where('is_verified', true)->get();
+       // Muat tender dengan items dan quotations melalui nested eager loading
+        $tender = Tender::with('items.quotations')->find($id);
 
-            // If the user is not an admin and has no verified partners, redirect with an error
-            if ($partners->isEmpty()) {
-                return redirect()->route('tender.index')->with('error', 'You must have at least one verified partner to create a tender.');
-            }
+        if (!$tender) {
+            abort(404, 'Tender not found');
         }
 
-        return view('tender.show', compact('tender', 'partners', 'categories', 'types'));
+        // Debug untuk melihat data jika diperlukan
+        dd($tender, $tender->items);
+        return view('tender.show', compact('tender'));
     }
 
     /**

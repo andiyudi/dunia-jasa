@@ -166,7 +166,7 @@ class QuotationController extends Controller
                 $totalPrice = $item['price'] * $tenderItem->quantity;
 
                 // Simpan quotation ke database dan ambil instance yang baru dibuat
-                $quotation = Quotation::create([
+                Quotation::create([
                     'tender_item_id' => $itemId,
                     'partner_user_id' => $partnerUserId,
                     'price' => $item['price'],
@@ -195,13 +195,16 @@ class QuotationController extends Controller
 
                 // Simpan informasi file ke database
                 QuotationFiles::create([
-                    'quotation_id' => $quotation->id,
+                    'tender_id' => $tenderItem->tender_id,
+                    'partner_id' => $validatedData['partner_id'],
                     'type_id' => $typeId,
                     'name' => $fileName,
                     'path' => $filePath,
-                    'note' => $validatedData['note'],
+                    'note' => $validatedData['note'] ?? '-',
                 ]);
             }
+
+
 
              // Commit transaksi jika semua berhasil
             DB::commit();
