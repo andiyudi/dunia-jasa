@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\QuotationFiles;
 use App\Models\Type;
 use App\Models\Tender;
 use App\Models\Partner;
 use App\Models\Quotation;
 use App\Models\TenderItem;
 use Illuminate\Http\Request;
-use App\Models\TenderDocument;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
@@ -165,8 +165,8 @@ class QuotationController extends Controller
                 // Hitung total harga untuk item
                 $totalPrice = $item['price'] * $tenderItem->quantity;
 
-                // Simpan quotation ke database
-                Quotation::create([
+                // Simpan quotation ke database dan ambil instance yang baru dibuat
+                $quotation = Quotation::create([
                     'tender_item_id' => $itemId,
                     'partner_user_id' => $partnerUserId,
                     'price' => $item['price'],
@@ -194,8 +194,8 @@ class QuotationController extends Controller
                 $typeId = Type::where('category', 'Quotation')->value('id');
 
                 // Simpan informasi file ke database
-                TenderDocument::create([
-                    'tender_id' => $tenderItem->tender_id,
+                QuotationFiles::create([
+                    'quotation_id' => $quotation->id,
                     'type_id' => $typeId,
                     'name' => $fileName,
                     'path' => $filePath,
