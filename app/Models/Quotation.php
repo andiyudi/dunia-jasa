@@ -27,9 +27,4 @@ class Quotation extends Model
     {
         return $this->belongsTo(PartnerUser::class, 'partner_user_id');
     }
-
-    public function quotationFiles()
-    {
-        return $this->hasMany(QuotationFiles::class, 'quotation_id');
-    }
 }

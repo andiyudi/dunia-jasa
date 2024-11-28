@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\QuotationController;
 
+Route::get('/tenders/{tender}/files/{partner}', [TenderController::class, 'showFiles'])->name('tender.files');
 Route::get('tender/{tender}/documents', [TenderController::class, 'getDocuments'])->name('tender.documents');
 Route::get('category/data', [CategoryController::class, 'getData'])->name('category.data');
 Route::post('partner/check', [PartnerController::class, 'checkName'])->name('partner.check');

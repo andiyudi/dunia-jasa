@@ -200,11 +200,9 @@ class QuotationController extends Controller
                     'type_id' => $typeId,
                     'name' => $fileName,
                     'path' => $filePath,
-                    'note' => $validatedData['note'] ?? '-',
+                    'note' => $validatedData['note'] ?? null,
                 ]);
             }
-
-
 
              // Commit transaksi jika semua berhasil
             DB::commit();

@@ -308,15 +308,18 @@ class TenderController extends Controller
     public function show($encryptTenderId)
     {
         $id = decrypt($encryptTenderId);
-       // Muat tender dengan items dan quotations melalui nested eager loading
-        $tender = Tender::with('items.quotations')->find($id);
+        // Muat tender dengan items dan quotations melalui nested eager loading
+        $tender = Tender::with([
+            'items.quotations.partnerUser.partner',
+            'files.partner',
+        ])->find($id);
 
         if (!$tender) {
             abort(404, 'Tender not found');
         }
 
         // Debug untuk melihat data jika diperlukan
-        dd($tender, $tender->items);
+        // dd($tender, $tender->items);
         return view('tender.show', compact('tender'));
     }
 

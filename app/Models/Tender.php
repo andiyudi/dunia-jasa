@@ -38,4 +38,9 @@ class Tender extends Model
     {
         return $this->hasMany(TenderDocument::class, 'tender_id');
     }
+
+    public function files()
+    {
+        return $this->hasMany(QuotationFiles::class, 'tender_id');
+    }
 }
