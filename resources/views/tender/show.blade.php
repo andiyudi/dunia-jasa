@@ -18,8 +18,8 @@ $pretitle = 'Table Comparations';
         <table class="table table-bordered" width="100%">
             <thead>
                 <tr>
-                    <th rowspan="2">No</th>
-                    <th colspan="5" class="text-center">Item</th>
+                    <th rowspan="2" class="text-center table-warning">No</th>
+                    <th colspan="5" class="text-center table-warning">Item</th>
                     @php
                         // Ambil semua partner unik dari quotations melalui partnerUser
                         $partners = collect();
@@ -33,20 +33,20 @@ $pretitle = 'Table Comparations';
                         $partners = $partners->filter()->unique();
                     @endphp
                     @foreach ($partners as $partner)
-                        <th colspan="4" class="text-center">{{ $partner }}</th>
+                        <th colspan="4" class="text-center table-secondary">{{ $partner }}</th>
                     @endforeach
                 </tr>
                 <tr>
-                    <th>Description</th>
-                    <th>Specification</th>
-                    <th>Quantity</th>
-                    <th>Unit</th>
-                    <th>Delivery</th>
+                    <th class="table-warning">Description</th>
+                    <th class="table-warning">Specification</th>
+                    <th class="table-warning">Quantity</th>
+                    <th class="table-warning">Unit</th>
+                    <th class="table-warning">Delivery</th>
                     @foreach ($partners as $partner)
-                        <th class="text-center">Remark</th>
-                        <th class="text-center">Delivery Time</th>
-                        <th class="text-center">Price</th>
-                        <th class="text-center">Total Price</th>
+                        <th class="text-center table-secondary">Remark</th>
+                        <th class="text-center table-secondary">Delivery Time</th>
+                        <th class="text-center table-secondary">Price</th>
+                        <th class="text-center table-secondary">Total Price</th>
                     @endforeach
                 </tr>
             </thead>
@@ -75,7 +75,7 @@ $pretitle = 'Table Comparations';
                 @endforeach
 
                 <!-- Baris Total -->
-                <tr>
+                <tr class="table-info">
                     <td colspan="6"><strong>Total</strong></td>
                     @foreach ($partners as $partner)
                         @php
