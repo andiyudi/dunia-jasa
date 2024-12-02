@@ -329,8 +329,41 @@ class TenderController extends Controller
     public function edit($encryptTenderId)
     {
         $id = decrypt($encryptTenderId);
-        dd($id);
+        // dd($id);
         $tender = Tender::find($id);
+
+         // Periksa apakah tender memiliki quotation melalui tender items
+        $hasQuotations = $tender->items()->whereHas('quotations')->exists();
+        if ($hasQuotations) {
+            return redirect()->route('tender.index')->with('error', 'Cannot edit tender with quotations already created.');
+        }
+
+        $user = Auth::user();
+        // Check if the user is an admin
+        if ($user->is_admin) {
+            // Admins can manage all partners or bypass restrictions
+            $partners = Partner::all(); // Admin can select any partner
+        } else {
+            // Regular user: retrieve only verified partners for the logged-in user
+            $partners = Partner::whereHas('users', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->where('is_verified', true) // Ensure only verified partners are retrieved
+            ->get();
+
+            // If the user is not an admin and has no verified partners, redirect with an error
+            if ($partners->isEmpty()) {
+                return redirect()->route('tender.index')->with('error', 'You must have at least one verified partner to create a tender.');
+            }
+        }
+        // Ambil partner_id yang terkait dengan tender
+        $selectedPartnerId = DB::table('partner_user')
+            ->where('id', $tender->partner_user_id)
+            ->value('partner_id');
+        $categories = Category::all();
+        $types = Type::where('category', 'Tender')->get();
+
+        return view ('tender.edit', compact('tender', 'categories', 'types', 'partners', 'selectedPartnerId'));
     }
 
     /**
@@ -338,9 +371,82 @@ class TenderController extends Controller
      */
     public function update(Request $request, $encryptTenderId)
     {
+        dd($request->all());
         $id = decrypt($encryptTenderId);
-        dd($id);
         $tender = Tender::find($id);
+
+        // Check if the tender already has quotations
+        if ($tender->items()->whereHas('quotations')->exists()) {
+            return redirect()->route('tender.index')->with('error', 'Tender cannot be updated as it already has quotations.');
+        }
+
+        // Validate the request data
+        $request->validate([
+            'partner_id' => 'required|exists:partners,id',
+            'category_id' => 'required|exists:categories,id',
+            'name'       => 'required|string|max:255',
+            'location'   => 'nullable|string|max:255',
+            'estimation' => 'nullable|string|max:255',
+            'types.*'    => 'nullable|file|mimes:pdf|max:2048', // Ensure all uploaded files are PDF and <= 2MB
+            'notes.*'    => 'nullable|string|max:1000',
+        ]);
+
+
+        DB::beginTransaction();
+        try {
+            // Ambil user yang sedang login
+            $user = auth()->user();
+
+            // Cari partner_user_id berdasarkan partner_id dan user_id dari tabel pivot partner_user
+            $partnerUser = DB::table('partner_user')
+                ->where('partner_id', $request['partner_id'])
+                ->where('user_id', $user->id)
+                ->first();
+
+            // Debugging tambahan jika partnerUser tidak ditemukan
+            if (!$partnerUser) {
+                // Jika partnerUser tidak ditemukan, batalkan transaksi
+                DB::rollBack();
+                return redirect()->back()->withErrors(['error' => 'You do not have permission to use this partner.']);
+            }
+
+            // Jika partnerUser ditemukan, lanjutkan
+            $request['partner_user_id'] = $partnerUser->id;
+            // Update tender data
+            $tender->update([
+                'partner_user_id' => $partnerUser->id, // Pastikan menggunakan partnerUser->id
+                'category_id' => $request->category_id,
+                'name'       => $request->name,
+                'location'   => $request->location,
+                'estimation' => $request->estimation,
+            ]);
+
+            // Simpan file ke dalam tabel tender_documents
+            if ($request->types) {
+                foreach ($request->types as $typeId => $file) {
+                    if ($file && $file->isValid()) {
+                        // Hapus file lama dengan type_id yang sama
+                        $existingDocument = TenderDocument::where('tender_id', $tender->id)
+                            ->where('type_id', $typeId)
+                            ->first();
+
+                        if ($existingDocument) {
+                            // Hapus entri dari database
+                            $existingDocument->delete();
+                        }
+
+                        // Upload file baru ke Google Drive
+                        $this->upload($tender->id, $file, $typeId, $request->notes[$typeId] ?? null);
+                    }
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('tender.index')->with('success', 'Tender updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to update tender. Please try again.');
+        }
     }
 
     /**
