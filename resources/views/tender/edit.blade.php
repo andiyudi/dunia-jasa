@@ -114,11 +114,26 @@ $pretitle = 'Data';
                     <tbody>
                         @foreach ($tender->items as $item)
                             <tr>
-                                <td>{{ $item->description }}</td>
-                                <td>{{ $item->specification }}</td>
-                                <td>{{ $item->quantity }}</td>
-                                <td>{{ $item->unit }}</td>
-                                <td>{{ $item->delivery }}</td>
+                                <td>
+                                    {{ $item->description }}
+                                    <input type="hidden" name="items[description][]" value="{{ $item->description }}">
+                                </td>
+                                <td>
+                                    {{ $item->specification }}
+                                    <input type="hidden" name="items[specification][]" value="{{ $item->specification }}">
+                                </td>
+                                <td>
+                                    {{ $item->quantity }}
+                                    <input type="hidden" name="items[quantity][]" value="{{ $item->quantity }}">
+                                </td>
+                                <td>
+                                    {{ $item->unit }}
+                                    <input type="hidden" name="items[unit][]" value="{{ $item->unit }}">
+                                </td>
+                                <td>
+                                    {{ $item->delivery }}
+                                    <input type="hidden" name="items[delivery][]" value="{{ $item->delivery }}">
+                                </td>
                                 <td>
                                     <button type="button" class="btn btn-danger remove-item" @if($tender->has_quotation) disabled @endif>Remove</button>
                                 </td>

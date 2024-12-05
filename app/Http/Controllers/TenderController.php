@@ -371,7 +371,7 @@ class TenderController extends Controller
      */
     public function update(Request $request, $encryptTenderId)
     {
-        dd($request->all());
+        // dd($request->all());
         $id = decrypt($encryptTenderId);
         $tender = Tender::find($id);
 
@@ -389,6 +389,12 @@ class TenderController extends Controller
             'estimation' => 'nullable|string|max:255',
             'types.*'    => 'nullable|file|mimes:pdf|max:2048', // Ensure all uploaded files are PDF and <= 2MB
             'notes.*'    => 'nullable|string|max:1000',
+            //validasi tender items
+            'items.description.*' => 'required|string|max:255',
+            'items.specification.*' => 'required|string|max:255',
+            'items.quantity.*' => 'required|integer|min:1',
+            'items.unit.*' => 'required|string|max:255',
+            'items.delivery.*' => 'required|string|max:255',
         ]);
 
 
@@ -420,6 +426,22 @@ class TenderController extends Controller
                 'location'   => $request->location,
                 'estimation' => $request->estimation,
             ]);
+
+            // Simpan tender_items
+            if ($request->has('items')) {
+                $items = $request->input('items');
+                $tender->items()->delete();
+
+                foreach ($items['description'] as $index => $description) {
+                    $tender->items()->create([
+                        'description'   => $description,
+                        'specification' => $items['specification'][$index] ?? null,
+                        'quantity'      => $items['quantity'][$index] ?? null,
+                        'unit'          => $items['unit'][$index] ?? null,
+                        'delivery'      => $items['delivery'][$index] ?? null,
+                    ]);
+                }
+            }
 
             // Simpan file ke dalam tabel tender_documents
             if ($request->types) {
