@@ -476,9 +476,30 @@ class TenderController extends Controller
      */
     public function destroy($encryptTenderId)
     {
-        $id = decrypt($encryptTenderId);
-        dd($id);
-        $tender = Tender::find($id);
+        // $id = decrypt($encryptTenderId);
+        // dd(auth()->id());
+        // $tender = Tender::find($id);
+        try {
+            $tenderId = decrypt($encryptTenderId);
+            $tender = Tender::findOrFail($tenderId);
+
+            // Check if the authenticated user has permission
+            $userId = auth()->id();
+            $isAuthorized = $tender->partner()
+                ->where('user_id', $userId)
+                ->exists();
+
+            if (!$isAuthorized && !auth()->user()->is_admin) {
+                return redirect()->back()->with('error', 'Unauthorized action.');
+            }
+             // Delete related items and documents
+            TenderItem::where('tender_id', $tenderId)->delete();
+            TenderDocument::where('tender_id', $tenderId)->delete();
+            $tender->delete();
+            return redirect()->route('tender.index')->with('success', 'Tender deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to delete tender.');
+        }
     }
 
 }
