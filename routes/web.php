@@ -11,6 +11,7 @@ use App\Http\Controllers\QuotationController;
 
 Route::get('/tenders/{tender}/files/{partner}', [TenderController::class, 'showFiles'])->name('tender.files');
 Route::get('tender/{tender}/documents', [TenderController::class, 'getDocuments'])->name('tender.documents');
+Route::patch('tender/{tender}/close', [TenderController::class, 'close'])->name('tender.close');
 Route::get('category/data', [CategoryController::class, 'getData'])->name('category.data');
 Route::post('partner/check', [PartnerController::class, 'checkName'])->name('partner.check');
 Route::get('partner/{partner}/upload', [PartnerController::class, 'upload'])->name('partner.upload');

@@ -502,4 +502,15 @@ class TenderController extends Controller
         }
     }
 
+    public function close(Request $request, Tender $tender)
+    {
+        try {
+            $tender->update(['status' => 1]); // Mengubah status tender ke 'closed'
+
+            return response()->json(['success' => true, 'message' => 'Tender closed successfully!']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to close tender.']);
+        }
+    }
+
 }

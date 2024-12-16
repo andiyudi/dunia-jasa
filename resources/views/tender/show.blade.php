@@ -158,5 +158,67 @@ $pretitle = 'Table Comparations';
             </tbody>
         </table>
     </div>
+    <!-- Back Button -->
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <a href="{{ route('tender.index') }}" class="btn btn-secondary">
+            Back
+        </a>
+        <!-- Close Tender Button -->
+        <button type="button" class="btn btn-success" id="closeTenderButton" data-url="{{ route('tender.close', $tender->id) }}">
+            Close Tender
+        </button>
+    </div>
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#closeTenderButton').on('click', function() {
+            var url = $(this).data('url');
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, close it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: url,
+                        type: 'PATCH',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire(
+                                    'Closed!',
+                                    response.message,
+                                    'success'
+                                ).then(() => {
+                                    window.location.href = "{{ route('tender.index') }}";
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    response.message,
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function(xhr) {
+                            Swal.fire(
+                                'Error!',
+                                'An error occurred while closing the tender.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
 @endsection
