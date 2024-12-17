@@ -71,7 +71,7 @@ class QuotationController extends Controller
                 })
                 ->addColumn('action', function($data){
                     $route = 'quotation';
-                    $disabled = $data->is_submitted ? 'disabled' : ''; // Disable button if already submitted
+                    $disabled = ($data->is_submitted || $data->status == 1) ? 'disabled' : ''; // Tambahkan kondisi untuk status == 1 // Disable button if already submitted
                     return view('tender.quotation.action', compact('route', 'data', 'disabled'));
                 })
                 // ->addColumn('is_submitted', function ($data) {
