@@ -29,13 +29,13 @@ $pretitle = 'Data';
                 <tr>
                     <th>Action</th>
                     <th>No</th>
+                    <th>Status</th>
                     <th>Company</th>
                     <th>Category</th>
                     <th>Tender</th>
-                    <th>Location</th>
                     <th>Estimation</th>
                     <th>Document</th>
-                    <th>Status</th>
+                    <th>Location</th>
                 </tr>
             </thead>
         </table>
@@ -70,13 +70,13 @@ $pretitle = 'Data';
             columns: [
                 {data: 'action', name: 'action', orderable: false, searchable: false},
                 {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
+                {data: 'status', name: 'status', orderable: false, searchable: false},
                 {data: 'partner', name: 'partner'},
                 {data: 'category', name: 'category'},
                 {data: 'name', name: 'name'},
-                {data: 'location', name: 'location'},
                 {data: 'estimation', name: 'estimation'},
                 {data: 'document', name: 'document'},
-                {data: 'status', name: 'status', orderable: false, searchable: false},
+                {data: 'location', name: 'location'},
             ]
         });
     });
