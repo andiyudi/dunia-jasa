@@ -159,7 +159,7 @@ $pretitle = 'Table Comparations';
         </table>
     </div>
     <!-- Back Button -->
-    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+    <div class="d-grid gap-2 d-md-flex mt-3 justify-content-md-end">
         <a href="{{ route('tender.index') }}" class="btn btn-secondary">
             Back
         </a>
