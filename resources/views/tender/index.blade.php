@@ -4,22 +4,15 @@
 $title    = 'Tender';
 $pretitle = 'Data';
 @endphp
-<!-- Filter Form -->
 <div class="row mb-3">
-    <div class="col-md-4 mb-3">
-    </div>
-    <div class="col-md-4 mb-3">
-    </div>
-    <div class="col-md-4 mb-3">
-        <div class="btn-group mb-3 float-end" role="group" aria-label="Basic example">
-            @auth
-                @if(Auth::user()->is_admin || Auth::user()->partners->contains('is_verified', true))
-                    <a href="{{ route('tender.create') }}" class="btn btn-primary">Create Tender</a>
-                @else
-                    <p class="text-muted">You must have at least one verified vendor to create a tender.</p>
-                @endif
-            @endauth
-        </div>
+    <div class="col text-end">
+        @auth
+            @if(Auth::user()->is_admin || Auth::user()->partners->contains('is_verified', true))
+                <a href="{{ route('tender.create') }}" class="btn btn-primary">Create Tender</a>
+            @else
+                <small class="text-muted">You must have at least one verified vendor to create a tender.</small>
+            @endif
+        @endauth
     </div>
 </div>
 <div class="table-responsive">
