@@ -31,18 +31,18 @@
                         <li class="sidebar-item">
                             <a href="{{ route('partner.index') }}" class='sidebar-link'>
                                 <i data-feather="clipboard" width="20"></i>
-                                <span>List Vendor</span>
+                                <span>Company Account</span>
                             </a>
                         </li>
                     <li class='sidebar-title'>Jobs</li>
                     <li class="sidebar-item">
                         <a href="{{ route('tender.index') }}" class='sidebar-link'>
                             <i data-feather="more-vertical" width="20"></i>
-                            <span>List Procurement</span>
+                            <span>Inquiry</span>
                         </a>
                         <a href="{{ route('quotation.index') }}" class='sidebar-link'>
                             <i data-feather="more-horizontal" width="20"></i>
-                            <span>List Tender</span>
+                            <span>Submit Quotation</span>
                         </a>
                     </li>
                     <li class='sidebar-title'>Other</li>

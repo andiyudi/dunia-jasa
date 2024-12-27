@@ -31,8 +31,8 @@ $pretitle = 'Data';
             <table class="table table-bordered table-striped table-hover display responsive no wrap" id="vendor-table" width="100%">
                 <thead>
                     <tr>
-                        <th style="text-align:center">Action</th>
                         <th style="text-align:center">No</th>
+                        <th style="text-align:center">Action</th>
                         <th style="text-align:center">Name</th>
                         <th style="text-align:center">Category</th>
                         <th style="text-align:center">Description</th>
@@ -79,8 +79,8 @@ $pretitle = 'Data';
                     }
                 },
                 columns: [
-                    { data: 'action', name: 'action', orderable: false, searchable: false },
                     { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                    { data: 'action', name: 'action', orderable: false, searchable: false },
                     { data: 'name', name: 'name' },
                     { data: 'categories', name: 'categories', orderable: false, searchable: false },
                     { data: 'description', name: 'description', orderable: false },

@@ -22,7 +22,7 @@
     <div class="row">
         <!-- Tender Information -->
         <div class="col-md-12 mb-4">
-            <h5 class="bg-primary text-white p-2">Name : {{ $tender->name }}</h5>
+            <h5 class="bg-info text-white p-2">Name : {{ $tender->name }}</h5>
             <div class="p-3 border">
                 <div class="row">
                     <div class="col-md-6">
@@ -73,7 +73,7 @@
 
         <!-- Tender Items Section with Submit Button -->
         <div class="col-md-12 mb-4">
-            <h5 class="bg-secondary text-white p-2">Tender Items</h5>
+            <h5 class="bg-info text-white p-2">Tender Items</h5>
         </div>
         <div class="col-md-12 mb-4">
             <button type="button" class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#submitQuotationModal" disabled id="submitQuotationItemButton">
@@ -115,7 +115,7 @@
 
         <!-- File Upload Section -->
         <div class="col-md-12 mt-4">
-            <h5 class="bg-warning text-white p-2">Upload Quotation Document</h5>
+            <h5 class="bg-info text-white p-2">Upload Quotation Document</h5>
             <div class="p-3 border">
                 <form action="{{ route('quotation.store') }}" method="POST" enctype="multipart/form-data" id="uploadQuotationForm">
                     @csrf

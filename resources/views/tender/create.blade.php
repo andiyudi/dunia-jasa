@@ -77,7 +77,7 @@ $pretitle = 'Data';
             <div class="col-md-6">
                 <!-- Estimation -->
                 <div class="form-group">
-                    <label for="estimation" class="form-label">Estimation</label>
+                    <label for="estimation" class="form-label">Time Estimation</label>
                     <input type="text" name="estimation" id="estimation" class="form-control">
                 </div>
             </div>
