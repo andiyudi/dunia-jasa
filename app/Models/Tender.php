@@ -14,6 +14,7 @@ class Tender extends Model
         'name',
         'location',
         'estimation',
+        'payment',
         'category_id',
         'partner_user_id',
         'status',

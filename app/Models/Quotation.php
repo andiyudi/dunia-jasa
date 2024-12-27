@@ -15,6 +15,7 @@ class Quotation extends Model
         'price',
         'total_price',
         'delivery_time',
+        'terms_price',
         'remark',
     ];
 

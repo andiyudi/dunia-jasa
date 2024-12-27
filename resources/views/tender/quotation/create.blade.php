@@ -34,6 +34,11 @@
                         <p><strong>Estimation :</strong> {{ $tender->estimation }}</p>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <p><strong>Payment :</strong> {{ $tender->payment }}</p>
+                    </div>
+                </div>
             </div>
         </div>
         <!-- Tender Documents -->

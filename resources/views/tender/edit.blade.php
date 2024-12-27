@@ -61,12 +61,17 @@ $pretitle = 'Data';
                     <label for="location" class="form-label">Location</label>
                     <input type="text" name="location" id="location" class="form-control" value="{{ old('location', $tender->location) }}" @if($tender->has_quotation) readonly @endif>
                 </div>
-            </div>
-            <div class="col-md-6">
                 <!-- Estimation -->
                 <div class="form-group">
                     <label for="estimation" class="form-label">Estimation</label>
                     <input type="text" name="estimation" id="estimation" class="form-control" value="{{ old('estimation', $tender->estimation) }}" @if($tender->has_quotation) readonly @endif>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <!-- Payment -->
+                <div class="form-group">
+                    <label for="payment" class="form-label">Payment</label>
+                    <textarea id="payment" name="payment" class="form-control mb-3" placeholder="Input your payment description here" rows="5">{{ old('payment', $tender->payment) }}@if($tender->has_quotation) readonly @endif</textarea>
                 </div>
             </div>
         </div>

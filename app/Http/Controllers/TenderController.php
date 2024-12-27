@@ -118,6 +118,7 @@ class TenderController extends Controller
                 'name' => 'required|string|max:255',
                 'location' => 'required|string|max:255',
                 'estimation' => 'required|string|max:255',
+                'payment' => 'nullable|string|max:255',
                 'category_id' => 'required|exists:categories,id',
                 'partner_id' => 'required|exists:partners,id',
                 // Validasi array item tender
@@ -387,6 +388,7 @@ class TenderController extends Controller
             'name'       => 'required|string|max:255',
             'location'   => 'nullable|string|max:255',
             'estimation' => 'nullable|string|max:255',
+            'payment' => 'nullable|string|max:255',
             'types.*'    => 'nullable|file|mimes:pdf|max:2048', // Ensure all uploaded files are PDF and <= 2MB
             'notes.*'    => 'nullable|string|max:1000',
             //validasi tender items
@@ -425,6 +427,7 @@ class TenderController extends Controller
                 'name'       => $request->name,
                 'location'   => $request->location,
                 'estimation' => $request->estimation,
+                'payment'    => $request->payment,
             ]);
 
             // Simpan tender_items

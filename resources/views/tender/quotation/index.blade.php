@@ -15,7 +15,8 @@ $pretitle = 'Data';
                     <th>Company</th>
                     <th>Category</th>
                     <th>Tender</th>
-                    <th>Estimation</th>
+                    <th>Payment</th>
+                    <th>Time Estimation</th>
                     <th>Document</th>
                     <th>Location</th>
                 </tr>
@@ -80,6 +81,7 @@ $pretitle = 'Data';
                 {data: 'partner', name: 'partner'},
                 {data: 'category', name: 'category'},
                 {data: 'name', name: 'name'},
+                {data: 'payment', name: 'payment'},
                 {data: 'estimation', name: 'estimation'},
                 {data: 'document', name: 'document'},
                 {data: 'location', name: 'location'},
