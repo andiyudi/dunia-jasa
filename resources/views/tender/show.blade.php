@@ -91,7 +91,11 @@ $pretitle = 'Table Comparations';
                         <td><strong>{{ number_format($totalPrice) }}</strong></td>
                     @endforeach
                 </tr>
-
+                <!-- Baris Terms of Payment -->
+                <td colspan="6"><strong>Terms of Payment</strong></td>
+                @foreach ($tender->payments as $payment)
+                    <td colspan="4">{{ $payment->terms_of_payment }}</td>
+                @endforeach
                 <!-- Baris Files -->
                 <tr>
                     <td colspan="6"><strong>Files</strong></td>

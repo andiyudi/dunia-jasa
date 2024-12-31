@@ -44,4 +44,9 @@ class Tender extends Model
     {
         return $this->hasMany(QuotationFiles::class, 'tender_id');
     }
+
+    public function payments()
+    {
+        return $this->hasMany(QuotationPayment::class, 'tender_id');
+    }
 }

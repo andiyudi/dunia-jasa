@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\QuotationFiles;
 use App\Models\Type;
 use App\Models\Tender;
 use App\Models\Partner;
 use App\Models\Quotation;
 use App\Models\TenderItem;
 use Illuminate\Http\Request;
+use App\Models\QuotationFiles;
+use App\Models\QuotationPayment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
@@ -131,6 +132,7 @@ class QuotationController extends Controller
             'items.*.remark' => 'nullable|string',
             'file' => 'nullable|file|mimes:pdf|max:2048',
             'note' => 'nullable|string|max:255',
+            'terms_of_payment' => 'nullable|string|max:255',
         ]);
 
         try {
@@ -175,6 +177,12 @@ class QuotationController extends Controller
                     'remark' => $item['remark'] ?? null,
                 ]);
             }
+            // Simpan data ke quotation_payment
+            QuotationPayment::create([
+                'tender_id' => $tenderItem->tender_id,
+                'partner_id' => $validatedData['partner_id'],
+                'terms_of_payment' => $validatedData['terms_of_payment'] ?? null,
+            ]);
 
             if ($request->hasFile('file')) {
                 $file = $request->file('file');

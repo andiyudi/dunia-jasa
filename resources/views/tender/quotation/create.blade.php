@@ -120,11 +120,16 @@
 
         <!-- File Upload Section -->
         <div class="col-md-12 mt-4">
-            <h5 class="bg-info text-white p-2">Upload Quotation Document</h5>
+            <h5 class="bg-info text-white p-2">Terms of Payment & Upload Quotation Document</h5>
             <div class="p-3 border">
                 <form action="{{ route('quotation.store') }}" method="POST" enctype="multipart/form-data" id="uploadQuotationForm">
                     @csrf
                     <div id="tenderItemsInputs"></div>
+                    <input type="hidden" name="tender_id" value="{{ $tender->id }}">
+                    <div class="mb-3">
+                        <label for="terms_of_payment" class="form-label">Terms of Payment:</label>
+                        <textarea name="terms_of_payment" id="terms_of_payment" rows="3" class="form-control"></textarea>
+                    </div>
                     <div class="mb-3">
                         <label for="file" class="form-label">File</label>
                         <input type="file" class="form-control" id="file" name="file">
@@ -242,7 +247,7 @@
 
 <script>
     let quotationData = {};
-let selectedPartnerId = null;
+    let selectedPartnerId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('selectPartnerButton').addEventListener('click', selectPartner);

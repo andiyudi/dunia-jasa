@@ -313,6 +313,7 @@ class TenderController extends Controller
         $tender = Tender::with([
             'items.quotations.partnerUser.partner',
             'files.partner',
+            'payments.partner', // Tambahkan payments dengan partner terkait
         ])->find($id);
 
         if (!$tender) {
