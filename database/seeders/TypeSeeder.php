@@ -14,10 +14,10 @@ class TypeSeeder extends Seeder
     {
         $types = [
             ['name' => 'Company Profile', 'category' => 'Legal'],
-            ['name' => 'Legalitas 1', 'category' => 'Legal'],
-            ['name' => 'Legalitas 2', 'category' => 'Legal'],
-            ['name' => 'Legalitas 3', 'category' => 'Legal'],
-            ['name' => 'KAK', 'category' => 'Tender'],
+            ['name' => 'Surat Kuasa', 'category' => 'Legal'],
+            ['name' => 'NPWP', 'category' => 'Legal'],
+            ['name' => 'Legalitas Lain-lain', 'category' => 'Legal'],
+            ['name' => 'KAK/RKS', 'category' => 'Tender'],
             ['name' => 'BOQ', 'category' => 'Tender'],
             ['name' => 'Offer', 'category' => 'Quotation'],
         ];
