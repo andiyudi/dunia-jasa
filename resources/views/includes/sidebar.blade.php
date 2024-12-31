@@ -46,14 +46,6 @@
                         </a>
                     </li>
                     <li class='sidebar-title'>Other</li>
-                    @if(auth()->user()->is_admin)
-                    <li class="sidebar-item">
-                        <a href="#" class='sidebar-link'>
-                            <i data-feather="settings" width="20"></i>
-                            <span>Settings</span>
-                        </a>
-                    </li>
-                    @endif
                     <li class="sidebar-item">
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -62,12 +54,6 @@
                                 <span>Log Out</span>
                             </a>
                         </form>
-                    </li>
-                    <li class="sidebar-item">
-                        <a href="#" class='sidebar-link'>
-                            <i data-feather="help-circle" width="20"></i>
-                            <span>Help</span>
-                        </a>
                     </li>
             </ul>
         </div>
